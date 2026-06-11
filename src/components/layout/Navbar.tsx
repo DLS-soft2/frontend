@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 
 export default function Navbar() {
-  const { isAuthenticated, user, login, logout } = useAuth();
+  const { isAuthenticated, user, roles, login, logout } = useAuth();
 
   return (
     <nav className="border-b border-gray-200 bg-white">
@@ -11,7 +11,7 @@ export default function Navbar() {
           <Link to="/" className="text-xl font-bold text-gray-900">
             DLS Delivery
           </Link>
-          {isAuthenticated && (
+          {isAuthenticated && roles.includes('customer') && (
             <>
               <Link to="/restaurants" className="text-sm text-gray-600 hover:text-gray-900">
                 Restaurants
@@ -23,6 +23,21 @@ export default function Navbar() {
                 Profile
               </Link>
             </>
+          )}
+          {isAuthenticated && roles.includes('courier') && (
+            <Link to="/courier" className="text-sm text-gray-600 hover:text-gray-900">
+              Deliveries
+            </Link>
+          )}
+          {isAuthenticated && roles.includes('restaurant') && (
+            <Link to="/restaurant-dashboard" className="text-sm text-gray-600 hover:text-gray-900">
+              Restaurant
+            </Link>
+          )}
+          {isAuthenticated && roles.includes('admin') && (
+            <Link to="/admin" className="text-sm text-gray-600 hover:text-gray-900">
+              Admin
+            </Link>
           )}
         </span>
         <div>

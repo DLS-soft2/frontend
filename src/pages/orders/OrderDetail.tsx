@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteOrder, getOrder, getOrderSnapshots } from '../../api/orders';
 import type { Order, OrderSnapshot } from '../../types/order';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -46,6 +46,11 @@ export default function OrderDetail() {
       </div>
       <p className="mt-2 text-sm text-gray-600">
         Placed {formatDateTime(order.created_at)} &middot; Delivery to {order.delivery_address}
+      </p>
+      <p className="mt-1 text-sm">
+        <Link to={`/orders/${order.id}/payments`} className="text-blue-600 hover:underline">
+          View Payments
+        </Link>
       </p>
       <h2 className="mt-6 text-xl font-semibold">Items</h2>
       <ul className="mt-2 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white px-4 shadow-sm">

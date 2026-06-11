@@ -8,7 +8,12 @@ import OrderCreate from './pages/orders/OrderCreate';
 import OrderList from './pages/orders/OrderList';
 import OrderDetail from './pages/orders/OrderDetail';
 import UserProfile from './pages/profile/UserProfile';
+import CourierDashboard from './pages/dashboard/CourierDashboard';
+import RestaurantDashboard from './pages/dashboard/RestaurantDashboard';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
+import PaymentStatus from './pages/payments/PaymentStatus';
 import RequireAuth from './security/RequireAuth';
+import RoleGuard from './security/RoleGuard';
 
 export default function App() {
   return (
@@ -59,10 +64,48 @@ export default function App() {
             }
           />
           <Route
+            path="/orders/:orderId/payments"
+            element={
+              <RequireAuth>
+                <PaymentStatus />
+              </RequireAuth>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <RequireAuth>
                 <UserProfile />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/courier"
+            element={
+              <RequireAuth>
+                <RoleGuard requiredRoles={['courier']}>
+                  <CourierDashboard />
+                </RoleGuard>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/restaurant-dashboard"
+            element={
+              <RequireAuth>
+                <RoleGuard requiredRoles={['restaurant']}>
+                  <RestaurantDashboard />
+                </RoleGuard>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <RoleGuard requiredRoles={['admin']}>
+                  <AdminDashboard />
+                </RoleGuard>
               </RequireAuth>
             }
           />
