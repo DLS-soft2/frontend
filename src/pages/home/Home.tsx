@@ -5,10 +5,13 @@ export default function Home() {
 
   if (!isAuthenticated) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1>DLS Food Delivery</h1>
-        <p>Please log in to continue.</p>
-        <button onClick={login} style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', fontSize: '1rem' }}>
+      <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+        <h1 className="text-2xl font-bold">DLS Food Delivery</h1>
+        <p className="mt-2 text-gray-600">Please log in to continue.</p>
+        <button
+          onClick={login}
+          className="mt-6 rounded bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700"
+        >
           Login
         </button>
       </div>
@@ -16,18 +19,23 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Welcome, {user?.username ?? 'User'}</h1>
-      <p>You are logged in.</p>
-      <div style={{ marginTop: '1rem' }}>
-        <h3>Your Roles</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+    <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+      <h1 className="text-2xl font-bold">Welcome, {user?.username ?? 'User'}</h1>
+      <p className="mt-2 text-gray-600">You are logged in.</p>
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold">Your Roles</h3>
+        <ul className="mt-2">
           {roles.map((role) => (
-            <li key={role} style={{ padding: '0.25rem' }}>{role}</li>
+            <li key={role} className="py-1 text-sm text-gray-600">
+              {role}
+            </li>
           ))}
         </ul>
       </div>
-      <button onClick={logout} style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', fontSize: '1rem' }}>
+      <button
+        onClick={logout}
+        className="mt-6 rounded border border-gray-300 px-6 py-2 font-medium hover:bg-gray-100"
+      >
         Logout
       </button>
     </div>
