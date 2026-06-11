@@ -46,7 +46,7 @@ export default function RestaurantDetail() {
 
   const proceedToOrder = () => {
     const draft: OrderDraft = {
-      restaurantId: restaurant.externalId,
+      restaurantId: restaurant.restaurantId,
       restaurantName: restaurant.name,
       items: selectedItems,
     };

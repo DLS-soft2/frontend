@@ -1,6 +1,5 @@
 export interface Restaurant {
   restaurantId: string;
-  externalId: string;
   name: string;
   address: string;
   phoneNumber: string;
