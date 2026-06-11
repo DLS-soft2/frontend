@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Navbar from './components/layout/Navbar';
+import AppLayout from './components/layout/AppLayout';
 import Home from './pages/home/Home';
 import LoginCallback from './pages/auth/LoginCallback';
 import RestaurantList from './pages/restaurants/RestaurantList';
@@ -14,19 +14,11 @@ import AdminDashboard from './pages/dashboard/AdminDashboard';
 import PaymentStatus from './pages/payments/PaymentStatus';
 import RequireAuth from './security/RequireAuth';
 import RoleGuard from './security/RoleGuard';
-import NotificationBanner from './components/ui/NotificationBanner';
-import { useAuth } from './context/useAuth';
-import { useNotificationContext } from './context/useNotificationContext';
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
-  const { notifications } = useNotificationContext();
-
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50 text-gray-900">
-        <Navbar />
-        {isAuthenticated && <NotificationBanner notifications={notifications} />}
+      <AppLayout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/callback" element={<LoginCallback />} />
@@ -117,7 +109,7 @@ export default function App() {
             }
           />
         </Routes>
-      </div>
+      </AppLayout>
     </BrowserRouter>
   );
 }
