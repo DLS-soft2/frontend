@@ -14,7 +14,6 @@ export interface OrderItemCreate {
 }
 
 export interface OrderCreate {
-  customer_id: string;
   restaurant_id: string;
   delivery_address: string;
   items: OrderItemCreate[];

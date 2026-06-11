@@ -1,12 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createOrder } from '../../api/orders';
-import { useAuth } from '../../context/useAuth';
 import type { OrderDraft } from '../../types/order';
 import { formatPrice } from '../../utils/format';
 
 export default function OrderCreate() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const draft = location.state as OrderDraft | null;
@@ -32,12 +30,10 @@ export default function OrderCreate() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!user) return;
     setSubmitting(true);
     setError(null);
     try {
       const order = await createOrder({
-        customer_id: user.id,
         restaurant_id: draft.restaurantId,
         delivery_address: deliveryAddress,
         items: draft.items,
