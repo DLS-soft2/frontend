@@ -14,12 +14,19 @@ import AdminDashboard from './pages/dashboard/AdminDashboard';
 import PaymentStatus from './pages/payments/PaymentStatus';
 import RequireAuth from './security/RequireAuth';
 import RoleGuard from './security/RoleGuard';
+import NotificationBanner from './components/ui/NotificationBanner';
+import { useAuth } from './context/useAuth';
+import { useNotificationContext } from './context/useNotificationContext';
 
 export default function App() {
+  const { isAuthenticated } = useAuth();
+  const { notifications } = useNotificationContext();
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50 text-gray-900">
         <Navbar />
+        {isAuthenticated && <NotificationBanner notifications={notifications} />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/callback" element={<LoginCallback />} />

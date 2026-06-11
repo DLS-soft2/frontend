@@ -1,19 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteOrder, getOrder, getOrderSnapshots } from '../../api/orders';
 import type { Order, OrderSnapshot } from '../../types/order';
 import StatusBadge from '../../components/ui/StatusBadge';
-import { formatDateTime, formatPrice } from '../../utils/format';
+import { useNotificationContext } from '../../context/useNotificationContext';
+import { formatDateTime, formatPrice, formatRelativeTime } from '../../utils/format';
 
 export default function OrderDetail() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { notifications } = useNotificationContext();
   const [order, setOrder] = useState<Order | null>(null);
   const [snapshots, setSnapshots] = useState<OrderSnapshot[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
+  const orderNotifications = notifications.filter((n) => n.order_id === orderId);
+
+  const loadOrder = useCallback(() => {
     if (!orderId) return;
     Promise.all([getOrder(orderId), getOrderSnapshots(orderId)])
       .then(([orderData, snapshotData]) => {
@@ -22,6 +26,14 @@ export default function OrderDetail() {
       })
       .catch(() => setError('Failed to load order.'));
   }, [orderId]);
+
+  useEffect(() => {
+    loadOrder();
+  }, [loadOrder]);
+
+  useEffect(() => {
+    if (orderNotifications.length > 0) loadOrder();
+  }, [orderNotifications.length, loadOrder]);
 
   if (error) return <p className="mx-auto max-w-2xl px-4 py-8 text-red-700">{error}</p>;
   if (!order) return <p className="mx-auto max-w-2xl px-4 py-8 text-gray-600">Loading order...</p>;
@@ -66,6 +78,20 @@ export default function OrderDetail() {
       <p className="mt-2 text-right">
         <strong>Total: {formatPrice(order.total_amount)}</strong>
       </p>
+      <h2 className="mt-6 text-xl font-semibold">Live Updates</h2>
+      {orderNotifications.length === 0 && (
+        <p className="mt-2 text-gray-600">No live updates yet.</p>
+      )}
+      <ul className="mt-2 space-y-1">
+        {orderNotifications.map((notification) => (
+          <li key={notification.id} className="rounded border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm">
+            {notification.message}
+            <span className="ml-2 text-xs text-gray-400">
+              {formatRelativeTime(notification.timestamp)}
+            </span>
+          </li>
+        ))}
+      </ul>
       <h2 className="mt-6 text-xl font-semibold">History</h2>
       {snapshots.length === 0 && <p className="mt-2 text-gray-600">No history yet.</p>}
       <ol className="mt-2 border-l-2 border-gray-200">
