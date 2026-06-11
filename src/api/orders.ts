@@ -6,6 +6,11 @@ export async function createOrder(order: OrderCreate): Promise<Order> {
   return data;
 }
 
+export async function listOrders(): Promise<Order[]> {
+  const { data } = await apiClient.get<Order[]>('/api/v1/orders/');
+  return data;
+}
+
 export async function listCustomerOrders(customerId: string): Promise<Order[]> {
   const { data } = await apiClient.get<Order[]>(`/api/v1/orders/customer/${customerId}`);
   return data;
