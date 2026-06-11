@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getRestaurant, listMenuItems } from '../../api/restaurants';
-import type { MenuItem, Restaurant } from '../../types/restaurant';
+import { fetchMenuItemsGraphql } from '../../api/restaurantQueries';
+import ApiSourceToggle, { type ApiSource } from '../../components/ui/ApiSourceToggle';
+import type { MenuItemSummary, Restaurant } from '../../types/restaurant';
 import type { OrderDraft } from '../../types/order';
 import { formatPrice } from '../../utils/format';
 
@@ -9,19 +11,25 @@ export default function RestaurantDetail() {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItemSummary[]>([]);
+  const [menuSource, setMenuSource] = useState<ApiSource>('rest');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!restaurantId) return;
-    Promise.all([getRestaurant(restaurantId), listMenuItems(restaurantId)])
-      .then(([restaurantData, menuData]) => {
-        setRestaurant(restaurantData);
-        setMenuItems(menuData);
-      })
+    getRestaurant(restaurantId)
+      .then(setRestaurant)
       .catch(() => setError('Failed to load restaurant.'));
   }, [restaurantId]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    const fetchMenu = menuSource === 'rest' ? listMenuItems : fetchMenuItemsGraphql;
+    fetchMenu(restaurantId)
+      .then(setMenuItems)
+      .catch(() => setError('Failed to load menu.'));
+  }, [restaurantId, menuSource]);
 
   if (error) return <p className="mx-auto max-w-2xl px-4 py-8 text-red-700">{error}</p>;
   if (!restaurant) return <p className="mx-auto max-w-2xl px-4 py-8 text-gray-600">Loading restaurant...</p>;
@@ -61,7 +69,10 @@ export default function RestaurantDetail() {
         {restaurant.address} &middot; {restaurant.openingHours} &middot;{' '}
         {restaurant.isOpen ? 'Open' : 'Closed'}
       </p>
-      <h2 className="mt-6 text-xl font-semibold">Menu</h2>
+      <div className="mt-6 flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Menu</h2>
+        <ApiSourceToggle source={menuSource} onChange={setMenuSource} />
+      </div>
       {menuItems.length === 0 && <p className="mt-2 text-gray-600">No menu items available.</p>}
       <ul className="mt-4 grid gap-3">
         {menuItems.map((item) => (

@@ -1,26 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listRestaurants } from '../../api/restaurants';
+import { fetchRestaurantsGraphql } from '../../api/restaurantQueries';
+import ApiSourceToggle, { type ApiSource } from '../../components/ui/ApiSourceToggle';
 import type { Restaurant } from '../../types/restaurant';
 
 export default function RestaurantList() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [source, setSource] = useState<ApiSource>('rest');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listRestaurants()
+    const fetchRestaurants = source === 'rest' ? listRestaurants : fetchRestaurantsGraphql;
+    fetchRestaurants()
       .then(setRestaurants)
       .catch(() => setError('Failed to load restaurants.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [source]);
+
+  const changeSource = (next: ApiSource) => {
+    setSource(next);
+    setLoading(true);
+    setError(null);
+  };
 
   if (loading) return <p className="mx-auto max-w-2xl px-4 py-8 text-gray-600">Loading restaurants...</p>;
   if (error) return <p className="mx-auto max-w-2xl px-4 py-8 text-red-700">{error}</p>;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">Restaurants</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Restaurants</h1>
+        <ApiSourceToggle source={source} onChange={changeSource} />
+      </div>
       {restaurants.length === 0 && <p className="mt-4 text-gray-600">No restaurants available.</p>}
       <ul className="mt-6 grid gap-3">
         {restaurants.map((restaurant) => (

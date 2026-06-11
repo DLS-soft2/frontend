@@ -19,6 +19,9 @@ export default function Navbar() {
               <Link to="/orders" className="text-sm text-gray-600 hover:text-gray-900">
                 My Orders
               </Link>
+              <Link to="/profile" className="text-sm text-gray-600 hover:text-gray-900">
+                Profile
+              </Link>
             </>
           )}
         </span>

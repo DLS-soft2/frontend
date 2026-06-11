@@ -7,6 +7,7 @@ import RestaurantDetail from './pages/restaurants/RestaurantDetail';
 import OrderCreate from './pages/orders/OrderCreate';
 import OrderList from './pages/orders/OrderList';
 import OrderDetail from './pages/orders/OrderDetail';
+import UserProfile from './pages/profile/UserProfile';
 import RequireAuth from './security/RequireAuth';
 
 export default function App() {
@@ -54,6 +55,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <OrderDetail />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <UserProfile />
               </RequireAuth>
             }
           />

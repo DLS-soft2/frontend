@@ -17,3 +17,5 @@ export interface MenuItem {
   price: number;
   restaurantId: string;
 }
+
+export type MenuItemSummary = Omit<MenuItem, 'restaurantId'>;
