@@ -13,15 +13,6 @@ interface RoleAction {
 
 const ICON = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 
-function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-medium text-slate-600">
-      {icon}
-      {label}
-    </span>
-  );
-}
-
 const roleActions: RoleAction[] = [
   {
     role: 'customer',
@@ -93,11 +84,7 @@ export default function Home() {
                 Log in to start ordering
               </Button>
             </div>
-            <div className="mx-auto mt-10 flex flex-wrap items-center justify-center gap-3">
-              <Pill icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>} label="Real-time tracking" />
-              <Pill icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>} label="Multi-role dashboard" />
-              <Pill icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 014 4c0 2-2 3-2 6H10c0-3-2-4-2-6a4 4 0 014-4z" /><path d="M10 18h4" /><path d="M10 22h4" /></svg>} label="AI-powered dispatch" />
-            </div>
+
           </div>
         </section>
       </div>

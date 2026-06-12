@@ -52,7 +52,7 @@ export default function OrderDetail() {
   }
 
   if (!order) {
-    return <LoadingState title="Loading order" message="Fetching order details and saga history." />;
+    return <LoadingState title="Loading order" message="Fetching order details and status history." />;
   }
 
   return (
@@ -88,7 +88,7 @@ export default function OrderDetail() {
           </p>
         </Card>
 
-        {/* Right column: Saga Timeline */}
+        {/* Right column: Order Status */}
         <Card className="border-indigo-200 bg-indigo-50/30">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -96,11 +96,8 @@ export default function OrderDetail() {
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              <h2 className="text-lg font-semibold text-indigo-900">Saga Timeline</h2>
+              <h2 className="text-lg font-semibold text-indigo-900">Order Status</h2>
             </div>
-            <p className="text-sm text-indigo-700/70">
-              Order lifecycle &mdash; snapshots and live events
-            </p>
           </CardHeader>
           <SagaTimeline
             snapshots={snapshots}

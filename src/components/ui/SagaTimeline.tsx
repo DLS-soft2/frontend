@@ -37,7 +37,7 @@ export function SagaTimeline({ snapshots, notifications, currentStatus }: SagaTi
   if (entries.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-slate-500">
-        No saga events yet. Updates will appear here as the order progresses.
+        No status updates yet. Updates will appear here as your order progresses.
       </p>
     );
   }
