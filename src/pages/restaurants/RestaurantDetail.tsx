@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ButtonLink } from '../../components/ui/Button';
 import { getRestaurant, listMenuItems } from '../../api/restaurants';
 import { fetchMenuItemsGraphql } from '../../api/restaurantQueries';
 import ApiSourceToggle, { type ApiSource } from '../../components/ui/ApiSourceToggle';
@@ -90,6 +91,11 @@ export default function RestaurantDetail() {
 
   return (
     <div>
+      <div className="mb-4">
+        <ButtonLink to="/restaurants" variant="ghost" size="sm">
+          &larr; Back to restaurants
+        </ButtonLink>
+      </div>
       <PageHeader title={restaurant.name}>
         <ApiSourceToggle source={menuSource} onChange={setMenuSource} />
       </PageHeader>
