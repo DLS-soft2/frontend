@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   completeDelivery,
   getMyCourier,
@@ -9,6 +9,7 @@ import { Card, CardHeader } from '../../components/ui/Card';
 import DeliveryStatusBadge from '../../components/ui/DeliveryStatusBadge';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { PageHeader } from '../../components/ui/PageHeader';
 import type { Courier, Delivery } from '../../types/delivery';
 import { formatDateTime } from '../../utils/format';
 
@@ -79,63 +80,86 @@ export default function CourierDashboard() {
   };
 
   if (state.kind === 'loading') {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <LoadingState title="Loading deliveries" message="Resolving your courier profile and assigned deliveries." />
-      </div>
-    );
+    return <LoadingState title="Loading deliveries" message="Resolving your courier profile and assigned deliveries." />;
   }
 
   if (state.kind === 'error') {
     return (
-      <div className="mx-auto max-w-3xl">
-        <ErrorState
-          message={state.message}
-          action={
-            <Button variant="secondary" onClick={reload}>
-              Try again
-            </Button>
-          }
-        />
-      </div>
+      <ErrorState
+        message={state.message}
+        action={
+          <Button variant="secondary" onClick={reload}>
+            Try again
+          </Button>
+        }
+      />
     );
   }
 
   if (state.kind === 'no-courier') {
     return (
-      <div className="mx-auto max-w-3xl">
-        <h1 className="text-2xl font-bold">Courier Dashboard</h1>
-        <Card className="mt-6">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-amber-800">Courier profile not linked</h2>
-          </CardHeader>
-          <p className="text-sm text-slate-600">
-            Your Keycloak account is not yet linked to a courier record in the courier service.
-            A courier must be created with your Keycloak user ID before scoped deliveries can
-            be displayed here.
-          </p>
-          <p className="mt-3 text-xs text-slate-400">
-            Backend dependency: <code className="rounded bg-slate-100 px-1">GET /api/v2/couriers/me</code> returned 404.
-          </p>
-        </Card>
+      <div>
+        <PageHeader title="Courier Dashboard" />
+        <div className="mt-6">
+          <ErrorState
+            title="Courier profile not linked"
+            message="Your Keycloak account is not yet linked to a courier record in the courier service. A courier must be created with your Keycloak user ID before scoped deliveries can be displayed here."
+            action={
+              <p className="text-xs text-orange-700">
+                Backend dependency: <code className="rounded bg-orange-100 px-1">GET /api/v2/couriers/me</code> returned 404.
+              </p>
+            }
+          />
+        </div>
       </div>
     );
   }
 
-  const { courier, deliveries } = state;
+  return <ReadyDashboard courier={state.courier} deliveries={state.deliveries} actionError={actionError} completingOrderId={completingOrderId} onReload={reload} onComplete={handleComplete} />;
+}
+
+function ReadyDashboard({ courier, deliveries, actionError, completingOrderId, onReload, onComplete }: {
+  courier: Courier;
+  deliveries: Delivery[];
+  actionError: string | null;
+  completingOrderId: string | null;
+  onReload: () => void;
+  onComplete: (orderId: string) => void;
+}) {
+  const stats = useMemo(() => {
+    const active = deliveries.filter((d) => ACTIONABLE_STATUSES.includes(d.status)).length;
+    const completed = deliveries.filter((d) => d.status === 'DELIVERED').length;
+    return { total: deliveries.length, active, completed };
+  }, [deliveries]);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Deliveries — {courier.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {courier.vehicleType}
-          </p>
+    <div>
+      <PageHeader title={`Deliveries \u2014 ${courier.name}`}>
+        <div className="flex items-center gap-3">
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{courier.vehicleType}</span>
+          <Button variant="secondary" size="sm" onClick={onReload}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Refresh
+          </Button>
         </div>
-        <Button variant="secondary" size="sm" onClick={reload}>
-          Refresh
-        </Button>
+      </PageHeader>
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-blue-500">
+          <p className="text-sm text-slate-500">Total Deliveries</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
+          <p className="text-sm text-slate-500">Active</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-emerald-500">
+          <p className="text-sm text-slate-500">Completed</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.completed}</p>
+        </div>
       </div>
 
       {actionError && (
@@ -147,7 +171,7 @@ export default function CourierDashboard() {
           <p className="text-slate-600">No deliveries assigned to you right now.</p>
         </Card>
       ) : (
-        <div className="mt-6 grid gap-4">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {deliveries.map((delivery) => (
             <Card as="article" key={delivery.deliveryId}>
               <CardHeader>
@@ -175,17 +199,13 @@ export default function CourierDashboard() {
               </dl>
 
               {ACTIONABLE_STATUSES.includes(delivery.status) && (
-                <div className="mt-4">
-                  <Button
-                    size="sm"
-                    onClick={() => handleComplete(delivery.orderId)}
-                    disabled={completingOrderId === delivery.orderId}
-                  >
-                    {completingOrderId === delivery.orderId
-                      ? 'Marking\u2026'
-                      : 'Mark delivered'}
-                  </Button>
-                </div>
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => onComplete(delivery.orderId)}
+                  disabled={completingOrderId === delivery.orderId}
+                >
+                  {completingOrderId === delivery.orderId ? 'Marking\u2026' : 'Mark delivered'}
+                </Button>
               )}
             </Card>
           ))}

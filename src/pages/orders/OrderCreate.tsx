@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createOrder } from '../../api/orders';
 import { Button, ButtonLink } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
+import { Card, CardHeader } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { useCart } from '../../context/useCart';
 import type { OrderDraft } from '../../types/order';
 import { formatPrice } from '../../utils/format';
@@ -20,7 +22,7 @@ export default function OrderCreate() {
 
   if (!draft || draft.items.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-xl">
         <Card className="text-center">
           <h1 className="text-lg font-semibold">Your cart is empty</h1>
           <p className="mt-2 text-sm text-slate-600">
@@ -60,50 +62,52 @@ export default function OrderCreate() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-bold">Create Order</h1>
-      <p className="mt-2">
-        Ordering from <strong>{draft.restaurantName}</strong>
-      </p>
-      <Card className="mt-4 px-6 py-2">
-        <ul className="divide-y divide-slate-200">
+    <div className="mx-auto max-w-xl">
+      <PageHeader title="Create Order" subtitle={`Ordering from ${draft.restaurantName}`} />
+
+      <Card className="mt-6">
+        <CardHeader>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+            Order Summary
+          </h2>
+        </CardHeader>
+        <ul className="divide-y divide-slate-100">
           {draft.items.map((item) => (
             <li key={item.menu_item_id} className="flex justify-between py-2 text-sm">
               <span>
                 {item.quantity} &times; {item.name}
               </span>
-              <span>{formatPrice(item.quantity * item.unit_price)}</span>
+              <span className="font-medium">{formatPrice(item.quantity * item.unit_price)}</span>
             </li>
           ))}
         </ul>
+        <p className="mt-3 border-t border-slate-100 pt-3 text-right text-lg font-bold">
+          Total: {formatPrice(total)}
+        </p>
       </Card>
-      <p className="mt-2 text-right">
-        <strong>Total: {formatPrice(total)}</strong>
-      </p>
-      <form onSubmit={handleSubmit} noValidate className="mt-4 grid gap-3">
-        <label htmlFor="delivery-address" className="text-sm font-medium">
-          Delivery address
-        </label>
-        <input
-          id="delivery-address"
-          value={deliveryAddress}
-          onChange={(event) => setDeliveryAddress(event.target.value)}
-          required
-          aria-invalid={addressError !== null}
-          aria-describedby={addressError ? 'delivery-address-error' : undefined}
-          placeholder="Street, number, city"
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-        />
-        {addressError && (
-          <p id="delivery-address-error" className="text-sm text-red-700">
-            {addressError}
-          </p>
-        )}
-        {error && <p className="text-sm text-red-700">{error}</p>}
-        <Button type="submit" disabled={submitting} className="justify-self-start">
-          {submitting ? 'Placing order...' : 'Place order'}
-        </Button>
-      </form>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+            Delivery Details
+          </h2>
+        </CardHeader>
+        <form onSubmit={handleSubmit} noValidate className="grid gap-4">
+          <Input
+            label="Delivery address"
+            name="delivery-address"
+            value={deliveryAddress}
+            onChange={(event) => setDeliveryAddress(event.target.value)}
+            required
+            placeholder="Street, number, city"
+            error={addressError ?? undefined}
+          />
+          {error && <p className="text-sm text-red-700">{error}</p>}
+          <Button type="submit" disabled={submitting} className="justify-self-start">
+            {submitting ? 'Placing order...' : 'Place order'}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

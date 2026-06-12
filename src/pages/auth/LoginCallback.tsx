@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LoadingState } from '../../components/ui/LoadingState';
 import { useAuth } from '../../context/useAuth';
 
 export default function LoginCallback() {
@@ -12,5 +13,5 @@ export default function LoginCallback() {
     }
   }, [initialized, isAuthenticated, navigate]);
 
-  return <div className="mx-auto max-w-3xl text-center text-slate-600">Completing login...</div>;
+  return <LoadingState title="Completing login" message="You'll be redirected shortly." />;
 }

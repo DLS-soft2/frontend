@@ -8,7 +8,10 @@ import {
 import { Button } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
+import { Input } from '../../components/ui/Input';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { Modal } from '../../components/ui/Modal';
+import { PageHeader } from '../../components/ui/PageHeader';
 import type { PendingOrder, Restaurant } from '../../types/restaurant';
 import { formatDateTime, formatPrice } from '../../utils/format';
 
@@ -24,6 +27,9 @@ export default function RestaurantDashboard() {
   const [reloadKey, setReloadKey] = useState(0);
   const [actionOrderId, setActionOrderId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const [rejectingOrderId, setRejectingOrderId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -78,14 +84,25 @@ export default function RestaurantDashboard() {
     }
   };
 
-  const handleReject = async (orderId: string) => {
-    const reason = window.prompt('Reason for rejecting this order?');
-    if (reason === null || reason.trim() === '') return;
+  const openRejectModal = (orderId: string) => {
+    setRejectingOrderId(orderId);
+    setRejectReason('');
+  };
 
+  const closeRejectModal = () => {
+    setRejectingOrderId(null);
+    setRejectReason('');
+  };
+
+  const confirmReject = async () => {
+    if (rejectingOrderId === null || rejectReason.trim() === '') return;
+
+    const orderId = rejectingOrderId;
+    closeRejectModal();
     setActionOrderId(orderId);
     setActionError(null);
     try {
-      await rejectOrder(orderId, reason.trim());
+      await rejectOrder(orderId, rejectReason.trim());
       await refreshPendingOrders();
     } catch {
       setActionError('Failed to reject order.');
@@ -95,40 +112,32 @@ export default function RestaurantDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <LoadingState title="Loading restaurant data" message="Fetching restaurant information." />
-      </div>
-    );
+    return <LoadingState title="Loading restaurant data" message="Fetching restaurant information." />;
   }
 
   if (error) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <ErrorState
-          message={error}
-          action={
-            <Button variant="secondary" onClick={retry}>
-              Try again
-            </Button>
-          }
-        />
-      </div>
+      <ErrorState
+        message={error}
+        action={
+          <Button variant="secondary" onClick={retry}>
+            Try again
+          </Button>
+        }
+      />
     );
   }
 
   if (data === null) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <ErrorState
-          message="Restaurant dashboard data was unavailable."
-          action={
-            <Button variant="secondary" onClick={retry}>
-              Try again
-            </Button>
-          }
-        />
-      </div>
+      <ErrorState
+        message="Restaurant dashboard data was unavailable."
+        action={
+          <Button variant="secondary" onClick={retry}>
+            Try again
+          </Button>
+        }
+      />
     );
   }
 
@@ -136,38 +145,47 @@ export default function RestaurantDashboard() {
   const actionInProgress = actionOrderId !== null;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Restaurant Dashboard &middot; {restaurant.isOpen ? 'Open' : 'Closed'} &middot;{' '}
-            {restaurant.isAvailable ? 'Available' : 'Unavailable'}
-          </p>
+    <div>
+      <PageHeader title={restaurant.name}>
+        <div className="flex items-center gap-3">
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${restaurant.isOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+            {restaurant.isOpen ? 'Open' : 'Closed'}
+          </span>
+          <Button variant="secondary" size="sm" onClick={retry} disabled={actionInProgress}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Refresh
+          </Button>
         </div>
-        <Button variant="secondary" size="sm" onClick={retry} disabled={actionInProgress}>
-          Refresh
-        </Button>
+      </PageHeader>
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
+          <p className="text-sm text-slate-500">Pending Orders</p>
+          <p className="text-2xl font-bold text-slate-900">{pendingOrders.length}</p>
+        </div>
       </div>
 
       {actionError && (
         <p className="mt-4 text-sm font-medium text-red-700" role="alert">{actionError}</p>
       )}
 
-      <h2 className="mt-8 text-lg font-semibold">Pending orders</h2>
+      <h2 className="text-lg font-semibold text-slate-900 mt-8 mb-4">Pending Orders</h2>
 
       {pendingOrders.length === 0 ? (
-        <Card className="mt-4 text-center">
+        <Card className="text-center">
           <p className="text-slate-600">No pending orders</p>
         </Card>
       ) : (
-        <div className="mt-4 grid gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {pendingOrders.map((order) => (
             <Card as="article" key={order.orderId}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900">Order {order.orderId.slice(0, 8)}</h3>
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
                     {order.status}
                   </span>
                 </div>
@@ -175,12 +193,12 @@ export default function RestaurantDashboard() {
 
               <dl className="grid gap-2 text-sm">
                 <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Order ID</dt>
-                  <dd className="text-slate-800">{order.orderId}</dd>
+                  <dt className="font-medium text-slate-500">Amount</dt>
+                  <dd className="font-semibold text-slate-900">{formatPrice(order.amount)}</dd>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Amount</dt>
-                  <dd className="text-slate-800">{formatPrice(order.amount)}</dd>
+                  <dt className="font-medium text-slate-500">Customer</dt>
+                  <dd className="text-slate-800">{order.customerId.slice(0, 8)}</dd>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <dt className="font-medium text-slate-500">Created</dt>
@@ -188,33 +206,59 @@ export default function RestaurantDashboard() {
                     {order.createdAt === null ? '\u2014' : formatDateTime(order.createdAt)}
                   </dd>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Customer</dt>
-                  <dd className="text-slate-800">{order.customerId}</dd>
-                </div>
               </dl>
 
               <div className="mt-4 flex gap-3">
                 <Button
-                  size="sm"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => handleAccept(order.orderId)}
                   disabled={actionInProgress}
                 >
-                  {actionOrderId === order.orderId ? 'Accepting…' : 'Accept'}
+                  {actionOrderId === order.orderId ? 'Accepting\u2026' : 'Accept'}
                 </Button>
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleReject(order.orderId)}
+                  variant="ghost"
+                  className="flex-1 text-red-700 border border-red-200 bg-red-50 hover:bg-red-100"
+                  onClick={() => openRejectModal(order.orderId)}
                   disabled={actionInProgress}
                 >
-                  {actionOrderId === order.orderId ? 'Rejecting…' : 'Reject'}
+                  Reject
                 </Button>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      <Modal
+        open={rejectingOrderId !== null}
+        onClose={closeRejectModal}
+        title="Reject Order"
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={closeRejectModal}>Cancel</Button>
+            <Button
+              size="sm"
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={confirmReject}
+              disabled={rejectReason.trim() === ''}
+            >
+              Confirm Reject
+            </Button>
+          </>
+        }
+      >
+        <p className="mb-3 text-sm text-slate-600">
+          Please provide a reason for rejecting order <strong>{rejectingOrderId?.slice(0, 8)}</strong>.
+        </p>
+        <Input
+          label="Reason"
+          name="reject-reason"
+          placeholder="e.g. Out of stock, kitchen closed..."
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 }

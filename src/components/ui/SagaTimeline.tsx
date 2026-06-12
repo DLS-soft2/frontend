@@ -1,6 +1,7 @@
 import type { Notification } from '../../types/notification';
 import type { OrderSnapshot, OrderStatus } from '../../types/order';
 import { formatDateTime, toTitleCase } from '../../utils/format';
+import { STATUS_CLASSES } from './statusClasses';
 
 type TimelineEntry =
   | { kind: 'snapshot'; data: OrderSnapshot; time: string }
@@ -60,7 +61,7 @@ export function SagaTimeline({ snapshots, notifications, currentStatus }: SagaTi
               {entry.kind === 'snapshot' ? (
                 <>
                   <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses(entry.data.status)}`}
+                    className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_CLASSES[entry.data.status]}`}
                   >
                     {toTitleCase(entry.data.status)}
                   </span>
@@ -83,16 +84,4 @@ export function SagaTimeline({ snapshots, notifications, currentStatus }: SagaTi
       })}
     </ol>
   );
-}
-
-function statusBadgeClasses(status: OrderStatus): string {
-  const map: Record<OrderStatus, string> = {
-    PENDING: 'bg-amber-100 text-amber-800',
-    PAID: 'bg-blue-100 text-blue-800',
-    PREPARING: 'bg-indigo-100 text-indigo-800',
-    OUT_FOR_DELIVERY: 'bg-orange-100 text-orange-800',
-    DELIVERED: 'bg-green-100 text-green-800',
-    CANCELLED: 'bg-red-100 text-red-800',
-  };
-  return map[status];
 }

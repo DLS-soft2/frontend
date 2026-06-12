@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { listRestaurants } from '../../api/restaurants';
 import { fetchRestaurantsGraphql } from '../../api/restaurantQueries';
 import ApiSourceToggle, { type ApiSource } from '../../components/ui/ApiSourceToggle';
-import { Button, ButtonLink } from '../../components/ui/Button';
-import { Card, CardHeader } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { PageHeader } from '../../components/ui/PageHeader';
 import type { Restaurant } from '../../types/restaurant';
 
 export default function RestaurantList() {
@@ -36,73 +38,75 @@ export default function RestaurantList() {
   };
 
   if (loading) {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <LoadingState title="Loading restaurants" message="Finding the best places near you." />
-      </div>
-    );
+    return <LoadingState title="Loading restaurants" message="Finding the best places near you." />;
   }
 
   if (error) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <ErrorState
-          message={error}
-          action={
-            <Button variant="secondary" onClick={retry}>
-              Try again
-            </Button>
-          }
-        />
-      </div>
+      <ErrorState
+        message={error}
+        action={
+          <Button variant="secondary" onClick={retry}>
+            Try again
+          </Button>
+        }
+      />
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Restaurants</h1>
+    <div>
+      <PageHeader title="Restaurants">
         <ApiSourceToggle source={source} onChange={changeSource} />
-      </div>
+      </PageHeader>
+
       {restaurants.length === 0 && (
-        <p className="mt-4 text-slate-600">No restaurants available.</p>
+        <p className="mt-6 text-slate-600">No restaurants available.</p>
       )}
-      <div className="mt-6 grid gap-4">
+
+      <div className="mt-6 grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {restaurants.map((restaurant) => (
-          <Card as="article" key={restaurant.restaurantId}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900">{restaurant.name}</h2>
-                <span
-                  className={
-                    restaurant.isOpen
-                      ? 'inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800'
-                      : 'inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800'
-                  }
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${restaurant.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
-                  />
-                  {restaurant.isOpen ? 'Open now' : 'Closed'}
-                </span>
-              </div>
-            </CardHeader>
-            {restaurant.description && (
-              <p className="text-sm text-slate-600">{restaurant.description}</p>
-            )}
-            <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-              <span>{restaurant.address}</span>
-              <span className="text-slate-300">&bull;</span>
-              <span>{restaurant.openingHours}</span>
-            </div>
-            <div className="mt-4">
-              <ButtonLink
-                to={`/restaurants/${restaurant.restaurantId}`}
-                variant="secondary"
-                size="sm"
+          <Card
+            as="article"
+            key={restaurant.restaurantId}
+            className="flex flex-col hover:border-slate-300 hover:shadow-md transition-all"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-lg font-bold text-slate-900">{restaurant.name}</h2>
+              <span
+                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  restaurant.isOpen
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
               >
-                View menu
-              </ButtonLink>
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${restaurant.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
+                />
+                {restaurant.isOpen ? 'Open' : 'Closed'}
+              </span>
+            </div>
+
+            {restaurant.description && (
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                {restaurant.description}
+              </p>
+            )}
+
+            <p className="mt-3 text-xs text-slate-500">
+              {restaurant.address}
+              {restaurant.openingHours && (
+                <> &middot; {restaurant.openingHours}</>
+              )}
+            </p>
+
+            <div className="mt-auto pt-4">
+              <Link
+                to={`/restaurants/${restaurant.restaurantId}`}
+                className="text-sm font-semibold text-blue-700 transition-colors hover:text-blue-900"
+              >
+                View menu &rarr;
+              </Link>
             </div>
           </Card>
         ))}

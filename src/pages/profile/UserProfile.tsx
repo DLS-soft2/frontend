@@ -2,7 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
+import { Input } from '../../components/ui/Input';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { useAuth } from '../../context/useAuth';
 import {
   createUserProfile,
@@ -12,6 +14,29 @@ import {
 import type { User } from '../../types/user';
 
 type ProfileView = 'loading' | 'no-profile' | 'view' | 'edit' | 'error';
+
+const graphqlBadge = (
+  <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-800">
+    <svg className="h-3.5 w-3.5" viewBox="0 0 400 400" fill="currentColor" aria-hidden="true">
+      <path d="M57.47 302.66l-14.38-8.3 118.34-204.94 14.38 8.3zM39.8 272.2h239.4v16.6H39.8zm317.87-18.32l-118.34-204.94 14.38-8.3 118.34 204.94zM120.63 24.47l239.4 138.2-8.3 14.38-239.4-138.2zm-8.3 329.06l-14.38-8.3 239.4-138.2 8.3 14.38zm8.3-14.38l8.3-14.38 239.4 138.2-8.3 14.38z" />
+    </svg>
+    GraphQL
+  </span>
+);
+
+interface ProfileFieldProps {
+  label: string;
+  value: string;
+}
+
+function ProfileField({ label, value }: ProfileFieldProps) {
+  return (
+    <div className="grid grid-cols-[140px_1fr] gap-2 py-2.5 text-sm">
+      <dt className="font-medium text-slate-500">{label}</dt>
+      <dd className="text-slate-900">{value}</dd>
+    </div>
+  );
+}
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -110,40 +135,24 @@ export default function UserProfile() {
       .finally(() => setSaving(false));
   };
 
-  const graphqlBadge = (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-800">
-      <svg className="h-3.5 w-3.5" viewBox="0 0 400 400" fill="currentColor" aria-hidden="true">
-        <path d="M57.47 302.66l-14.38-8.3 118.34-204.94 14.38 8.3zM39.8 272.2h239.4v16.6H39.8zm317.87-18.32l-118.34-204.94 14.38-8.3 118.34 204.94zM120.63 24.47l239.4 138.2-8.3 14.38-239.4-138.2zm-8.3 329.06l-14.38-8.3 239.4-138.2 8.3 14.38zm8.3-14.38l8.3-14.38 239.4 138.2-8.3 14.38z" />
-      </svg>
-      GraphQL
-    </span>
-  );
-
   if (view === 'no-profile') {
     return (
       <div className="mx-auto max-w-2xl">
-        <Card>
+        <PageHeader title="Create Your Profile">{graphqlBadge}</PageHeader>
+
+        <Card className="mt-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Create Your Profile</h1>
-              {graphqlBadge}
-            </div>
             <p className="text-sm text-slate-500">
               No profile exists yet. Create one from your account details.
             </p>
           </CardHeader>
 
-          <dl className="grid gap-3 text-sm">
-            <div>
-              <dt className="font-medium text-slate-500">Full name</dt>
-              <dd className="text-slate-900">
-                {user ? `${user.firstName} ${user.lastName}`.trim() : '—'}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-medium text-slate-500">Email</dt>
-              <dd className="text-slate-900">{user?.email ?? '—'}</dd>
-            </div>
+          <dl className="divide-y divide-slate-100">
+            <ProfileField
+              label="Full name"
+              value={user ? `${user.firstName} ${user.lastName}`.trim() : '\u2014'}
+            />
+            <ProfileField label="Email" value={user?.email ?? '\u2014'} />
           </dl>
 
           {errorMsg && (
@@ -164,12 +173,10 @@ export default function UserProfile() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Card>
+      <PageHeader title={profile?.fullName ?? 'My Profile'}>{graphqlBadge}</PageHeader>
+
+      <Card className="mt-6">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{profile?.fullName ?? 'My Profile'}</h1>
-            {graphqlBadge}
-          </div>
           <p className="text-sm text-slate-500">
             Profile managed via GraphQL &middot; user-service
           </p>
@@ -193,19 +200,10 @@ export default function UserProfile() {
 
         {!isEditing ? (
           <>
-            <dl className="grid gap-3 text-sm">
-              <div>
-                <dt className="font-medium text-slate-500">Email</dt>
-                <dd className="text-slate-900">{profile?.email ?? '—'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-slate-500">Phone</dt>
-                <dd className="text-slate-900">{profile?.phone ?? '—'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-slate-500">Default address</dt>
-                <dd className="text-slate-900">{profile?.defaultAddress ?? '—'}</dd>
-              </div>
+            <dl className="divide-y divide-slate-100">
+              <ProfileField label="Email" value={profile?.email ?? '\u2014'} />
+              <ProfileField label="Phone" value={profile?.phone ?? '\u2014'} />
+              <ProfileField label="Default address" value={profile?.defaultAddress ?? '\u2014'} />
             </dl>
             <div className="mt-6">
               <Button
@@ -221,30 +219,20 @@ export default function UserProfile() {
           </>
         ) : (
           <form onSubmit={handleSave} className="grid gap-4">
-            <div>
-              <label htmlFor="profile-phone" className="mb-1 block text-sm font-medium text-slate-700">
-                Phone
-              </label>
-              <input
-                id="profile-phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label htmlFor="profile-address" className="mb-1 block text-sm font-medium text-slate-700">
-                Default address
-              </label>
-              <input
-                id="profile-address"
-                type="text"
-                value={defaultAddress}
-                onChange={(e) => setDefaultAddress(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              />
-            </div>
+            <Input
+              label="Phone"
+              name="profile-phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <Input
+              label="Default address"
+              name="profile-address"
+              type="text"
+              value={defaultAddress}
+              onChange={(e) => setDefaultAddress(e.target.value)}
+            />
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={saving}>
                 {saving ? 'Saving...' : 'Save changes'}

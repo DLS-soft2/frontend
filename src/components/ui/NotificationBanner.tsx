@@ -20,7 +20,7 @@ export default function NotificationBanner({ notifications }: NotificationBanner
   const visible = notifications.slice(0, 5);
 
   return (
-    <div className="fixed right-4 top-16 z-50 flex w-80 flex-col gap-2">
+    <div className="fixed right-6 top-16 z-50 flex w-80 flex-col gap-2">
       <div className="flex items-center gap-1.5 self-end rounded-full bg-white/90 px-2.5 py-1 text-xs shadow-sm backdrop-blur">
         {connected ? (
           <>

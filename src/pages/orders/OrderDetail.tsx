@@ -5,6 +5,7 @@ import { Button, ButtonLink } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { SagaTimeline } from '../../components/ui/SagaTimeline';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { useNotificationContext } from '../../context/useNotificationContext';
@@ -42,25 +43,19 @@ export default function OrderDetail() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <ErrorState
-          message={error}
-          action={
-            <Button variant="secondary" onClick={loadOrder}>
-              Try again
-            </Button>
-          }
-        />
-      </div>
+      <ErrorState
+        message={error}
+        action={
+          <Button variant="secondary" onClick={loadOrder}>
+            Try again
+          </Button>
+        }
+      />
     );
   }
 
   if (!order) {
-    return (
-      <div className="mx-auto max-w-2xl">
-        <LoadingState title="Loading order" message="Fetching order details and saga history." />
-      </div>
-    );
+    return <LoadingState title="Loading order" message="Fetching order details and saga history." />;
   }
 
   const handleDelete = async () => {
@@ -76,50 +71,61 @@ export default function OrderDetail() {
   };
 
   return (
-    <div className="mx-auto grid max-w-2xl gap-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Order {order.id.slice(0, 8)}</h1>
-            <StatusBadge status={order.status} />
-          </div>
-          <p className="text-sm text-slate-500">
-            Placed {formatDateTime(order.created_at)} &middot; Delivery to{' '}
-            {order.delivery_address}
+    <div>
+      <PageHeader title={`Order ${order.id.slice(0, 8)}`}>
+        <StatusBadge status={order.status} />
+      </PageHeader>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        {/* Left column: Order info */}
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold">Order Details</h2>
+            <p className="text-sm text-slate-500">
+              Placed {formatDateTime(order.created_at)} &middot; Delivery to{' '}
+              {order.delivery_address}
+            </p>
+          </CardHeader>
+
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Items</h3>
+          <ul className="mt-2 divide-y divide-slate-100">
+            {order.items.map((item) => (
+              <li key={item.id} className="flex justify-between py-2 text-sm">
+                <span>
+                  {item.quantity} &times; {item.name}
+                </span>
+                <span className="font-medium">{formatPrice(item.quantity * item.unit_price)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 border-t border-slate-100 pt-3 text-right text-lg font-bold">
+            Total: {formatPrice(order.total_amount)}
           </p>
-        </CardHeader>
+        </Card>
 
-        <h2 className="text-lg font-semibold">Items</h2>
-        <ul className="mt-2 divide-y divide-slate-100">
-          {order.items.map((item) => (
-            <li key={item.id} className="flex justify-between py-2 text-sm">
-              <span>
-                {item.quantity} &times; {item.name}
-              </span>
-              <span className="font-medium">{formatPrice(item.quantity * item.unit_price)}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-right text-lg font-bold">
-          Total: {formatPrice(order.total_amount)}
-        </p>
-      </Card>
+        {/* Right column: Saga Timeline */}
+        <Card className="border-indigo-200 bg-indigo-50/30">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <h2 className="text-lg font-semibold text-indigo-900">Saga Timeline</h2>
+            </div>
+            <p className="text-sm text-indigo-700/70">
+              Order lifecycle &mdash; snapshots and live events
+            </p>
+          </CardHeader>
+          <SagaTimeline
+            snapshots={snapshots}
+            notifications={orderNotifications}
+            currentStatus={order.status}
+          />
+        </Card>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <h2 className="text-lg font-semibold">Saga Timeline</h2>
-          <p className="text-sm text-slate-500">
-            Order lifecycle — snapshots and live events
-          </p>
-        </CardHeader>
-        <SagaTimeline
-          snapshots={snapshots}
-          notifications={orderNotifications}
-          currentStatus={order.status}
-        />
-      </Card>
-
-      <div className="flex items-center gap-3">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <ButtonLink to={`/orders/${order.id}/payments`} variant="secondary" size="sm">
           View payments
         </ButtonLink>
