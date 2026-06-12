@@ -23,28 +23,28 @@ export default function AdminDashboard() {
   }, []);
 
   if (loading) {
-    return <p className="mx-auto max-w-4xl px-4 py-8 text-gray-600">Loading overview...</p>;
+    return <p className="mx-auto max-w-3xl text-slate-600">Loading overview...</p>;
   }
   if (error) {
-    return <p className="mx-auto max-w-4xl px-4 py-8 text-red-700">{error}</p>;
+    return <p className="mx-auto max-w-3xl text-red-700">{error}</p>;
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-bold">Admin Overview</h1>
       <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-600">Total Orders</p>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-sm text-slate-600">Total Orders</p>
           <p className="text-3xl font-bold">{orders.length}</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-gray-600">Total Payments</p>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-sm text-slate-600">Total Payments</p>
           <p className="text-3xl font-bold">{payments.length}</p>
         </div>
       </div>
       <h2 className="mt-8 text-xl font-semibold">Orders</h2>
-      {orders.length === 0 && <p className="mt-2 text-gray-600">No orders.</p>}
-      <ul className="mt-2 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white px-4 shadow-sm">
+      {orders.length === 0 && <p className="mt-2 text-slate-600">No orders.</p>}
+      <ul className="mt-2 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white px-4 shadow-sm">
         {orders.map((order) => (
           <li key={order.id} className="flex items-center justify-between py-2 text-sm">
             <span>
@@ -56,8 +56,8 @@ export default function AdminDashboard() {
         ))}
       </ul>
       <h2 className="mt-8 text-xl font-semibold">Payments</h2>
-      {payments.length === 0 && <p className="mt-2 text-gray-600">No payments.</p>}
-      <ul className="mt-2 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white px-4 shadow-sm">
+      {payments.length === 0 && <p className="mt-2 text-slate-600">No payments.</p>}
+      <ul className="mt-2 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white px-4 shadow-sm">
         {payments.map((payment) => (
           <li key={payment.id} className="flex items-center justify-between py-2 text-sm">
             <span>
@@ -68,6 +68,6 @@ export default function AdminDashboard() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

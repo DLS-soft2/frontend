@@ -12,5 +12,5 @@ export default function LoginCallback() {
     }
   }, [initialized, isAuthenticated, navigate]);
 
-  return <div className="mx-auto max-w-6xl px-4 py-16 text-center text-gray-600">Completing login...</div>;
+  return <div className="mx-auto max-w-3xl text-center text-slate-600">Completing login...</div>;
 }

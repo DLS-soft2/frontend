@@ -23,7 +23,7 @@ export default function OrderCreate() {
       <div className="mx-auto max-w-2xl">
         <Card className="text-center">
           <h1 className="text-lg font-semibold">Your cart is empty</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-slate-600">
             Pick a restaurant and add some dishes to start an order.
           </p>
           <div className="mt-5">
@@ -66,7 +66,7 @@ export default function OrderCreate() {
         Ordering from <strong>{draft.restaurantName}</strong>
       </p>
       <Card className="mt-4 px-6 py-2">
-        <ul className="divide-y divide-gray-200">
+        <ul className="divide-y divide-slate-200">
           {draft.items.map((item) => (
             <li key={item.menu_item_id} className="flex justify-between py-2 text-sm">
               <span>
@@ -92,7 +92,7 @@ export default function OrderCreate() {
           aria-invalid={addressError !== null}
           aria-describedby={addressError ? 'delivery-address-error' : undefined}
           placeholder="Street, number, city"
-          className="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
         />
         {addressError && (
           <p id="delivery-address-error" className="text-sm text-red-700">

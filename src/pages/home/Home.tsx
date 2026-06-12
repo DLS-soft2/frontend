@@ -47,7 +47,7 @@ export default function Home() {
 
   if (!isAuthenticated) {
     return (
-      <section className="mx-auto max-w-3xl py-16 text-center">
+      <section className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">
           AAAB Food Delivery
         </p>
@@ -68,7 +68,7 @@ export default function Home() {
   const actions = roleActions.filter((action) => roles.includes(action.role));
 
   return (
-    <section className="mx-auto max-w-3xl py-8">
+    <section className="mx-auto max-w-3xl">
       <h1 className="text-3xl font-bold tracking-tight">
         Welcome back, {user?.firstName || user?.username || 'there'}
       </h1>
