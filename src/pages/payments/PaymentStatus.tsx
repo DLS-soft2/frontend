@@ -88,7 +88,7 @@ export default function PaymentStatus() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <PageHeader title="Payments" subtitle={`Order ${orderId?.slice(0, 8) ?? ''}`} />
 
       <div className="mt-6">

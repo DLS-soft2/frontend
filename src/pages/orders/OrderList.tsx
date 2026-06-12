@@ -105,7 +105,7 @@ export default function OrderList() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <PageHeader title="My Orders" />
       <div className="mt-6">
         <DataTable
