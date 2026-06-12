@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNotificationContext } from '../../context/useNotificationContext';
 import type { Notification, NotificationEventType } from '../../types/notification';
 import { formatRelativeTime } from '../../utils/format';
@@ -17,12 +16,8 @@ interface NotificationBannerProps {
 }
 
 export default function NotificationBanner({ notifications }: NotificationBannerProps) {
-  const { connected } = useNotificationContext();
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
-  const visible = notifications.filter((n) => !dismissedIds.has(n.id)).slice(0, 5);
-
-  const dismiss = (id: string) =>
-    setDismissedIds((prev) => new Set(prev).add(id));
+  const { connected, dismiss } = useNotificationContext();
+  const visible = notifications.slice(0, 5);
 
   return (
     <div className="fixed right-4 top-16 z-50 flex w-80 flex-col gap-2">
