@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { ButtonLink } from '../components/ui/Button';
+import { Card, CardHeader } from '../components/ui/Card';
 import { useAuth } from '../context/useAuth';
 
 interface RoleGuardProps {
@@ -12,15 +13,21 @@ export default function RoleGuard({ requiredRoles, children }: RoleGuardProps) {
 
   if (!requiredRoles.some((role) => roles.includes(role))) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="text-2xl font-bold">Access Denied</h1>
-        <p className="mt-2 text-gray-600">
-          You do not have permission to view this page.{' '}
-          <Link to="/" className="text-blue-600 hover:underline">
-            Back to home
-          </Link>
-        </p>
-      </main>
+      <div className="mx-auto max-w-3xl">
+        <Card>
+          <CardHeader>
+            <h1 className="text-2xl font-bold text-slate-900">Access Denied</h1>
+          </CardHeader>
+          <p className="text-sm text-slate-600">
+            You do not have the required role to view this page.
+          </p>
+          <div className="mt-6">
+            <ButtonLink to="/" variant="secondary" size="sm">
+              Back to home
+            </ButtonLink>
+          </div>
+        </Card>
+      </div>
     );
   }
 
