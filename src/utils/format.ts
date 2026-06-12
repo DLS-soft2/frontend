@@ -15,3 +15,8 @@ export function formatRelativeTime(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   return new Date(iso).toLocaleDateString();
 }
+
+export function toTitleCase(raw: string): string {
+  const lower = raw.replace(/_/g, ' ').toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}

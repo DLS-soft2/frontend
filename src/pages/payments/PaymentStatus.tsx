@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
 import type { Payment, PaymentStatus as PaymentStatusType } from '../../types/payment';
-import { formatDateTime, formatPrice } from '../../utils/format';
+import { formatDateTime, formatPrice, toTitleCase } from '../../utils/format';
 
 const PAYMENT_STATUS_CLASSES: Record<PaymentStatusType, string> = {
   AUTHORIZED: 'bg-green-100 text-green-800',
@@ -15,10 +15,6 @@ const PAYMENT_STATUS_CLASSES: Record<PaymentStatusType, string> = {
   CAPTURED: 'bg-blue-100 text-blue-800',
   REFUNDED: 'bg-slate-100 text-slate-800',
 };
-
-function toTitleCase(raw: string): string {
-  return raw.charAt(0) + raw.slice(1).toLowerCase();
-}
 
 export default function PaymentStatus() {
   const { orderId } = useParams<{ orderId: string }>();

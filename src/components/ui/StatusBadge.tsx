@@ -1,4 +1,5 @@
 import type { OrderStatus } from '../../types/order';
+import { toTitleCase } from '../../utils/format';
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
   PENDING: 'bg-amber-100 text-amber-800',
@@ -11,11 +12,6 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
 
 interface StatusBadgeProps {
   status: OrderStatus;
-}
-
-function toTitleCase(raw: string): string {
-  const lower = raw.replace(/_/g, ' ').toLowerCase();
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

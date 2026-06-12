@@ -1,6 +1,6 @@
 import type { Notification } from '../../types/notification';
 import type { OrderSnapshot, OrderStatus } from '../../types/order';
-import { formatDateTime } from '../../utils/format';
+import { formatDateTime, toTitleCase } from '../../utils/format';
 
 type TimelineEntry =
   | { kind: 'snapshot'; data: OrderSnapshot; time: string }
@@ -22,11 +22,6 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 };
 
 const NOTIFICATION_DOT = 'bg-slate-400';
-
-function toTitleCase(raw: string): string {
-  const lower = raw.replace(/_/g, ' ').toLowerCase();
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
-}
 
 function humanEventType(eventType: string): string {
   return eventType.replace(/([a-z])([A-Z])/g, '$1 $2');
