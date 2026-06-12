@@ -5,7 +5,7 @@ import {
   listMyDeliveries,
 } from '../../api/couriers';
 import { Button } from '../../components/ui/Button';
-import { Card, CardHeader } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import DeliveryStatusBadge from '../../components/ui/DeliveryStatusBadge';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
@@ -147,18 +147,18 @@ function ReadyDashboard({ courier, deliveries, actionError, completingOrderId, o
         </div>
       </PageHeader>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-blue-500">
-          <p className="text-sm text-slate-500">Total Deliveries</p>
-          <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm border-l-3 border-l-blue-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Total</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">{stats.total}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
-          <p className="text-sm text-slate-500">Active</p>
-          <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm border-l-3 border-l-amber-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Active</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">{stats.active}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-emerald-500">
-          <p className="text-sm text-slate-500">Completed</p>
-          <p className="text-2xl font-bold text-slate-900">{stats.completed}</p>
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm border-l-3 border-l-emerald-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Completed</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">{stats.completed}</p>
         </div>
       </div>
 
@@ -173,33 +173,25 @@ function ReadyDashboard({ courier, deliveries, actionError, completingOrderId, o
       ) : (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {deliveries.map((delivery) => (
-            <Card as="article" key={delivery.deliveryId}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-slate-900">
-                    Order {delivery.orderId.slice(0, 8)}
-                  </h2>
-                  <DeliveryStatusBadge status={delivery.status} />
-                </div>
-              </CardHeader>
+            <Card as="article" key={delivery.deliveryId} className="p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-900">
+                  {delivery.orderId.slice(0, 8)}
+                </span>
+                <DeliveryStatusBadge status={delivery.status} />
+              </div>
 
-              <dl className="grid gap-2 text-sm">
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Pickup</dt>
-                  <dd className="text-slate-800">{delivery.pickupAddress ?? '\u2014'}</dd>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Drop-off</dt>
-                  <dd className="text-slate-800">{delivery.deliveryAddress ?? '\u2014'}</dd>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Assigned</dt>
-                  <dd className="text-slate-800">{formatDateTime(delivery.assignedAt)}</dd>
-                </div>
+              <dl className="mt-3 grid grid-cols-[80px_1fr] gap-x-2 gap-y-1.5 text-sm">
+                <dt className="text-slate-400">Pickup</dt>
+                <dd className="text-slate-700 truncate">{delivery.pickupAddress ?? '\u2014'}</dd>
+                <dt className="text-slate-400">Drop-off</dt>
+                <dd className="text-slate-700 truncate">{delivery.deliveryAddress ?? '\u2014'}</dd>
+                <dt className="text-slate-400">Assigned</dt>
+                <dd className="text-slate-700">{formatDateTime(delivery.assignedAt)}</dd>
               </dl>
 
               {ACTIONABLE_STATUSES.includes(delivery.status) && (
-                <div className="mt-4">
+                <div className="mt-3 border-t border-slate-100 pt-3">
                   <Button
                     size="sm"
                     onClick={() => onComplete(delivery.orderId)}

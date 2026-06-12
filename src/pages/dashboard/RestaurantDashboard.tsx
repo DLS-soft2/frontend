@@ -6,7 +6,7 @@ import {
   rejectOrder,
 } from '../../api/restaurants';
 import { Button } from '../../components/ui/Button';
-import { Card, CardHeader } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { Input } from '../../components/ui/Input';
 import { LoadingState } from '../../components/ui/LoadingState';
@@ -182,10 +182,10 @@ export default function RestaurantDashboard() {
         </div>
       </PageHeader>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
-          <p className="text-sm text-slate-500">Pending Orders</p>
-          <p className="text-2xl font-bold text-slate-900">{pendingOrders.length}</p>
+      <div className="mt-6">
+        <div className="inline-block rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm border-l-3 border-l-amber-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Pending</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">{pendingOrders.length}</p>
         </div>
       </div>
 
@@ -202,34 +202,26 @@ export default function RestaurantDashboard() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {pendingOrders.map((order) => (
-            <Card as="article" key={order.orderId}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-slate-900">Order {order.orderId.slice(0, 8)}</h3>
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                    {order.status}
-                  </span>
-                </div>
-              </CardHeader>
+            <Card as="article" key={order.orderId} className="p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-900">{order.orderId.slice(0, 8)}</span>
+                <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                  {order.status}
+                </span>
+              </div>
 
-              <dl className="grid gap-2 text-sm">
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Amount</dt>
-                  <dd className="font-semibold text-slate-900">{formatPrice(order.amount)}</dd>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Customer</dt>
-                  <dd className="text-slate-800">{order.customerId.slice(0, 8)}</dd>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <dt className="font-medium text-slate-500">Created</dt>
-                  <dd className="text-slate-800">
-                    {order.createdAt === null ? '\u2014' : formatDateTime(order.createdAt)}
-                  </dd>
-                </div>
+              <dl className="mt-3 grid grid-cols-[80px_1fr] gap-x-2 gap-y-1.5 text-sm">
+                <dt className="text-slate-400">Amount</dt>
+                <dd className="font-semibold text-slate-900">{formatPrice(order.amount)}</dd>
+                <dt className="text-slate-400">Customer</dt>
+                <dd className="text-slate-700">{order.customerId.slice(0, 8)}</dd>
+                <dt className="text-slate-400">Created</dt>
+                <dd className="text-slate-700">
+                  {order.createdAt === null ? '\u2014' : formatDateTime(order.createdAt)}
+                </dd>
               </dl>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
                 <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white"
