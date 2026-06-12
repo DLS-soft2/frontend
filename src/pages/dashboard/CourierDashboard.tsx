@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
   completeDelivery,
-  getCurrentCourier,
-  listDeliveriesForCourier,
+  getMyCourier,
+  listMyDeliveries,
 } from '../../api/couriers';
 import { Button } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
@@ -44,8 +44,8 @@ export default function CourierDashboard() {
     let cancelled = false;
     async function fetchData() {
       try {
-        const courier = await getCurrentCourier();
-        const deliveries = await listDeliveriesForCourier(courier.courierId);
+        const courier = await getMyCourier();
+        const deliveries = await listMyDeliveries(courier.courierId);
         if (!cancelled) setState({ kind: 'ready', courier, deliveries });
       } catch (err: unknown) {
         if (cancelled) return;
@@ -128,9 +128,9 @@ export default function CourierDashboard() {
     <div className="mx-auto max-w-3xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Courier Dashboard</h1>
+          <h1 className="text-2xl font-bold">Deliveries — {courier.name}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {courier.name} &middot; {courier.vehicleType}
+            {courier.vehicleType}
           </p>
         </div>
         <Button variant="secondary" size="sm" onClick={reload}>
