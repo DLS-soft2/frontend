@@ -9,16 +9,17 @@ const LABELS: Record<ApiSource, string> = { rest: 'REST', graphql: 'GraphQL' };
 
 export default function ApiSourceToggle({ source, onChange }: ApiSourceToggleProps) {
   return (
-    <span className="flex items-center gap-1 text-xs">
-      <span className="mr-1 text-gray-500">Loaded via</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-1.5 py-1 text-xs">
+      <span className="pl-1.5 text-slate-500">Loaded via</span>
       {(Object.keys(LABELS) as ApiSource[]).map((option) => (
         <button
           key={option}
+          type="button"
           onClick={() => onChange(option)}
           className={
             option === source
-              ? 'rounded bg-blue-600 px-2 py-1 font-medium text-white'
-              : 'rounded border border-gray-300 px-2 py-1 text-gray-600 hover:bg-gray-100'
+              ? 'rounded-full bg-blue-700 px-2.5 py-0.5 font-semibold text-white shadow-sm transition'
+              : 'rounded-full px-2.5 py-0.5 font-medium text-slate-600 transition hover:bg-slate-200'
           }
         >
           {LABELS[option]}
