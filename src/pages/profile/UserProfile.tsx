@@ -147,12 +147,12 @@ export default function UserProfile() {
   if (view === 'no-profile') {
     return (
       <div className="mx-auto max-w-2xl">
-        <PageHeader title="Set Up Your Profile">{graphqlBadge}</PageHeader>
+        <PageHeader title="Complete Your Profile">{graphqlBadge}</PageHeader>
 
         <Card className="mt-6">
           <CardHeader>
             <p className="text-sm text-slate-500">
-              No profile found. Save one from your account details.
+              Confirm your details to finish setting up your account.
             </p>
           </CardHeader>
 
@@ -170,7 +170,7 @@ export default function UserProfile() {
 
           <div className="mt-6">
             <Button onClick={handleCreate} disabled={saving}>
-              {saving ? 'Saving...' : 'Save profile'}
+              {saving ? 'Saving\u2026' : 'Confirm & continue'}
             </Button>
           </div>
         </Card>

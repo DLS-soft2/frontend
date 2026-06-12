@@ -148,15 +148,15 @@ function ReadyDashboard({ courier, deliveries, actionError, completingOrderId, o
       </PageHeader>
 
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-blue-500">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-blue-500">
           <p className="text-sm text-slate-500">Total Deliveries</p>
           <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
           <p className="text-sm text-slate-500">Active</p>
           <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-emerald-500">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-emerald-500">
           <p className="text-sm text-slate-500">Completed</p>
           <p className="text-2xl font-bold text-slate-900">{stats.completed}</p>
         </div>
@@ -199,13 +199,15 @@ function ReadyDashboard({ courier, deliveries, actionError, completingOrderId, o
               </dl>
 
               {ACTIONABLE_STATUSES.includes(delivery.status) && (
-                <Button
-                  className="mt-4 w-full"
-                  onClick={() => onComplete(delivery.orderId)}
-                  disabled={completingOrderId === delivery.orderId}
-                >
-                  {completingOrderId === delivery.orderId ? 'Marking\u2026' : 'Mark delivered'}
-                </Button>
+                <div className="mt-4">
+                  <Button
+                    size="sm"
+                    onClick={() => onComplete(delivery.orderId)}
+                    disabled={completingOrderId === delivery.orderId}
+                  >
+                    {completingOrderId === delivery.orderId ? 'Marking\u2026' : 'Mark delivered'}
+                  </Button>
+                </div>
               )}
             </Card>
           ))}

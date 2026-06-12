@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { useNotificationContext } from '../../context/useNotificationContext';
-import type { Notification, NotificationEventType } from '../../types/notification';
+import type { ClientNotification } from '../../lib/useNotifications';
+import type { NotificationEventType } from '../../types/notification';
 import { formatRelativeTime } from '../../utils/format';
 import { Button } from '../ui/Button';
 
@@ -31,13 +32,25 @@ function BellIcon() {
   );
 }
 
-function NotificationItem({ notification, onDismiss }: { notification: Notification; onDismiss: (id: string) => void }) {
+interface NotificationItemProps {
+  notification: ClientNotification;
+  onDismiss: (id: string) => void;
+  onMarkRead: (id: string) => void;
+}
+
+function NotificationItem({ notification, onDismiss, onMarkRead }: NotificationItemProps) {
   return (
-    <div className="border-b border-slate-100 px-4 py-3 last:border-b-0 hover:bg-slate-50">
+    <div
+      className={`border-b border-slate-100 px-4 py-3 last:border-b-0 transition-colors ${notification.read ? 'bg-white' : 'bg-blue-50/50'}`}
+      onMouseEnter={() => { if (!notification.read) onMarkRead(notification.id); }}
+    >
       <div className="flex items-start justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          {EVENT_LABELS[notification.event_type]}
-        </p>
+        <div className="flex items-center gap-2">
+          {!notification.read && <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {EVENT_LABELS[notification.event_type]}
+          </p>
+        </div>
         <button
           onClick={() => onDismiss(notification.id)}
           aria-label="Dismiss notification"
@@ -58,10 +71,9 @@ interface TopBarProps {
 
 export default function TopBar({ onMenuClick }: TopBarProps) {
   const { isAuthenticated, user, login, logout } = useAuth();
-  const { notifications, connected, dismiss, clearAll } = useNotificationContext();
+  const { notifications, unreadCount, connected, dismiss, markRead, markAllRead, clearAll } = useNotificationContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const count = notifications.length;
 
   const toggleDropdown = useCallback(() => setDropdownOpen((prev) => !prev), []);
 
@@ -100,9 +112,9 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                   aria-label="Notifications"
                 >
                   <BellIcon />
-                  {count > 0 && (
+                  {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                      {count > 99 ? '99+' : count}
+                      {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
                 </button>
@@ -110,14 +122,22 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                 {dropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-96 max-h-96 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl z-50">
                     <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-                      <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                         {connected ? (
                           <span className="h-2 w-2 rounded-full bg-green-500" title="Live" />
                         ) : (
                           <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" title="Reconnecting" />
                         )}
                       </div>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllRead}
+                          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          Mark all read
+                        </button>
+                      )}
                     </div>
 
                     {notifications.length === 0 ? (
@@ -125,7 +145,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                     ) : (
                       <>
                         {notifications.map((n) => (
-                          <NotificationItem key={n.id} notification={n} onDismiss={dismiss} />
+                          <NotificationItem key={n.id} notification={n} onDismiss={dismiss} onMarkRead={markRead} />
                         ))}
                         <div className="border-t border-slate-200 px-4 py-2">
                           <button

@@ -10,7 +10,7 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-const cardClasses = 'rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow';
+const cardClasses = 'rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow';
 const hoverClasses = 'hover:shadow-md hover:border-slate-300 cursor-pointer';
 
 export function Card({ children, as: Element = 'section', hoverable = false, className = '', ...props }: CardProps) {

@@ -1,10 +1,13 @@
 import { createContext } from 'react';
-import type { Notification } from '../types/notification';
+import type { ClientNotification } from '../lib/useNotifications';
 
 export interface NotificationState {
-  notifications: Notification[];
+  notifications: ClientNotification[];
+  unreadCount: number;
   connected: boolean;
   dismiss: (id: string) => void;
+  markRead: (id: string) => void;
+  markAllRead: () => void;
   clearAll: () => void;
 }
 

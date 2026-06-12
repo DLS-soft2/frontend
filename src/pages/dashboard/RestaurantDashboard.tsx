@@ -183,7 +183,7 @@ export default function RestaurantDashboard() {
       </PageHeader>
 
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm border-l-4 border-l-amber-500">
           <p className="text-sm text-slate-500">Pending Orders</p>
           <p className="text-2xl font-bold text-slate-900">{pendingOrders.length}</p>
         </div>
@@ -229,9 +229,10 @@ export default function RestaurantDashboard() {
                 </div>
               </dl>
 
-              <div className="mt-4 flex gap-3">
+              <div className="mt-4 flex gap-2">
                 <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => handleAccept(order.orderId)}
                   disabled={actionInProgress}
                 >
@@ -239,7 +240,8 @@ export default function RestaurantDashboard() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="flex-1 text-red-700 border border-red-200 bg-red-50 hover:bg-red-100"
+                  size="sm"
+                  className="text-red-700 border border-red-200 bg-red-50 hover:bg-red-100"
                   onClick={() => openRejectModal(order.orderId)}
                   disabled={actionInProgress}
                 >

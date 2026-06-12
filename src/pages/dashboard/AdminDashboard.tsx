@@ -59,7 +59,7 @@ const PAYMENT_COLUMNS: Column<Payment>[] = [
 
 function StatCard({ icon, label, value, borderColor }: { icon: React.ReactNode; label: string; value: number; borderColor: string }) {
   return (
-    <div className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm border-l-4 ${borderColor}`}>
+    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-l-4 ${borderColor}`}>
       <div className="flex items-center gap-3">
         <div className="text-slate-400">{icon}</div>
         <div>
