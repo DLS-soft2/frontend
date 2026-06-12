@@ -102,12 +102,12 @@ export default function CourierDashboard() {
         <PageHeader title="Courier Dashboard" />
         <div className="mt-6">
           <ErrorState
-            title="Courier profile not linked"
-            message="Your Keycloak account is not yet linked to a courier record in the courier service. A courier must be created with your Keycloak user ID before scoped deliveries can be displayed here."
+            title="Profile not set up"
+            message="Your courier profile hasn't been set up yet. Please contact an administrator to link your account."
             action={
-              <p className="text-xs text-orange-700">
-                Backend dependency: <code className="rounded bg-orange-100 px-1">GET /api/v2/couriers/me</code> returned 404.
-              </p>
+              <Button variant="secondary" onClick={reload}>
+                Try again
+              </Button>
             }
           />
         </div>

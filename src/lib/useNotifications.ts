@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { settings } from '../settings';
 import type { Notification } from '../types/notification';
 
 const RECONNECT_DELAY_MS = 3000;
-const AUTO_DISMISS_MS = 8000;
 
 function wsBaseUrl(): string {
   if (settings.notificationWsUrl) return settings.notificationWsUrl;
@@ -15,28 +14,18 @@ export function useNotifications(customerId: string | undefined): {
   notifications: Notification[];
   connected: boolean;
   dismiss: (id: string) => void;
+  clearAll: () => void;
 } {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [connected, setConnected] = useState(false);
-  const timersRef = useRef<Map<string, number>>(new Map());
 
   const dismiss = useCallback((id: string) => {
-    const timer = timersRef.current.get(id);
-    if (timer !== undefined) window.clearTimeout(timer);
-    timersRef.current.delete(id);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
-  const scheduleExpiry = useCallback(
-    (id: string) => {
-      const timer = window.setTimeout(() => {
-        timersRef.current.delete(id);
-        setNotifications((prev) => prev.filter((n) => n.id !== id));
-      }, AUTO_DISMISS_MS);
-      timersRef.current.set(id, timer);
-    },
-    [],
-  );
+  const clearAll = useCallback(() => {
+    setNotifications([]);
+  }, []);
 
   useEffect(() => {
     if (!customerId) return undefined;
@@ -47,14 +36,16 @@ export function useNotifications(customerId: string | undefined): {
 
     const connect = () => {
       socket = new WebSocket(`${wsBaseUrl()}/api/v1/ws/${customerId}`);
-      socket.onopen = () => setConnected(true);
+      socket.onopen = () => {
+        setNotifications([]);
+        setConnected(true);
+      };
       socket.onmessage = (event: MessageEvent<string>) => {
         const notification = JSON.parse(event.data) as Notification;
         setNotifications((prev) => {
           if (prev.some((n) => n.id === notification.id)) return prev;
           return [notification, ...prev];
         });
-        scheduleExpiry(notification.id);
       };
       socket.onclose = () => {
         setConnected(false);
@@ -63,15 +54,12 @@ export function useNotifications(customerId: string | undefined): {
     };
 
     connect();
-    const timers = timersRef.current;
     return () => {
       unmounted = true;
       window.clearTimeout(reconnectTimer);
       socket.close();
-      timers.forEach((timer) => window.clearTimeout(timer));
-      timers.clear();
     };
-  }, [customerId, scheduleExpiry]);
+  }, [customerId]);
 
-  return { notifications, connected, dismiss };
+  return { notifications, connected, dismiss, clearAll };
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { deleteOrder, getOrder, getOrderSnapshots } from '../../api/orders';
+import { useParams } from 'react-router-dom';
+import { getOrder, getOrderSnapshots } from '../../api/orders';
 import { Button, ButtonLink } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { ErrorState } from '../../components/ui/ErrorState';
@@ -14,13 +14,10 @@ import { formatDateTime, formatPrice } from '../../utils/format';
 
 export default function OrderDetail() {
   const { orderId } = useParams<{ orderId: string }>();
-  const navigate = useNavigate();
   const { notifications } = useNotificationContext();
   const [order, setOrder] = useState<Order | null>(null);
   const [snapshots, setSnapshots] = useState<OrderSnapshot[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
   const orderNotifications = notifications.filter((n) => n.order_id === orderId);
 
   const loadOrder = useCallback(() => {
@@ -57,18 +54,6 @@ export default function OrderDetail() {
   if (!order) {
     return <LoadingState title="Loading order" message="Fetching order details and saga history." />;
   }
-
-  const handleDelete = async () => {
-    setDeleting(true);
-    setError(null);
-    try {
-      await deleteOrder(order.id);
-      navigate('/orders');
-    } catch {
-      setError('Failed to delete order.');
-      setDeleting(false);
-    }
-  };
 
   return (
     <div>
@@ -132,10 +117,6 @@ export default function OrderDetail() {
         <ButtonLink to="/orders" variant="ghost" size="sm">
           Back to orders
         </ButtonLink>
-        <div className="flex-1" />
-        <Button variant="ghost" size="sm" onClick={handleDelete} disabled={deleting}>
-          {deleting ? 'Deleting...' : 'Delete order'}
-        </Button>
       </div>
     </div>
   );

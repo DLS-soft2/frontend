@@ -1,9 +1,7 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import NotificationBanner from '../ui/NotificationBanner';
 import { useAuth } from '../../context/useAuth';
-import { useNotificationContext } from '../../context/useNotificationContext';
 
 const STORAGE_KEY = 'sidebar-collapsed';
 
@@ -21,7 +19,6 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated } = useAuth();
-  const { notifications } = useNotificationContext();
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -55,7 +52,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       <div className={`min-h-screen transition-all duration-200 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <TopBar onMenuClick={toggleMobile} />
-        <NotificationBanner notifications={notifications} />
         <main className="px-6 py-6">{children}</main>
       </div>
     </div>

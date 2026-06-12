@@ -5,6 +5,7 @@ export interface NotificationState {
   notifications: Notification[];
   connected: boolean;
   dismiss: (id: string) => void;
+  clearAll: () => void;
 }
 
 export const NotificationContext = createContext<NotificationState | null>(null);

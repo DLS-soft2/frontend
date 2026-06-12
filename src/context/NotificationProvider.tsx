@@ -9,10 +9,10 @@ interface NotificationProviderProps {
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const { user } = useAuth();
-  const { notifications, connected, dismiss } = useNotifications(user?.id);
+  const { notifications, connected, dismiss, clearAll } = useNotifications(user?.id);
 
   return (
-    <NotificationContext.Provider value={{ notifications, connected, dismiss }}>
+    <NotificationContext.Provider value={{ notifications, connected, dismiss, clearAll }}>
       {children}
     </NotificationContext.Provider>
   );

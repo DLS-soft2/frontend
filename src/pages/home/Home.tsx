@@ -60,26 +60,6 @@ const roleActions: RoleAction[] = [
   },
 ];
 
-interface StatCardProps {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}
-
-function StatCard({ label, value, icon }: StatCardProps) {
-  return (
-    <Card className="flex items-center gap-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-        {icon}
-      </div>
-      <div>
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
-      </div>
-    </Card>
-  );
-}
-
 export default function Home() {
   const { isAuthenticated, user, roles, login } = useAuth();
 
@@ -132,24 +112,6 @@ export default function Home() {
         title={`Welcome back, ${user?.firstName || user?.username || 'there'}`}
         subtitle="What would you like to do today?"
       />
-
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          label="Active Orders"
-          value="--"
-          icon={<svg {...ICON}><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 01-8 0" /></svg>}
-        />
-        <StatCard
-          label="Restaurants Available"
-          value="--"
-          icon={<svg {...ICON}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2" /><path d="M7 2v20" /><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" /></svg>}
-        />
-        <StatCard
-          label="Recent Deliveries"
-          value="--"
-          icon={<svg {...ICON}><path d="M1 3h15v13H1z" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>}
-        />
-      </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {actions.map((action) => (

@@ -20,10 +20,28 @@ interface DashboardData {
   pendingOrders: PendingOrder[];
 }
 
+type DashboardState =
+  | { kind: 'loading' }
+  | { kind: 'no-restaurant' }
+  | { kind: 'error'; message: string }
+  | { kind: 'ready'; data: DashboardData };
+
+function extractHttpStatus(err: unknown): number {
+  if (
+    err !== null &&
+    typeof err === 'object' &&
+    'response' in err &&
+    err.response !== null &&
+    typeof err.response === 'object' &&
+    'status' in err.response
+  ) {
+    return (err.response as { status: number }).status;
+  }
+  return 0;
+}
+
 export default function RestaurantDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<DashboardState>({ kind: 'loading' });
   const [reloadKey, setReloadKey] = useState(0);
   const [actionOrderId, setActionOrderId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -41,16 +59,14 @@ export default function RestaurantDashboard() {
           getPendingOrders(),
         ]);
         if (!cancelled) {
-          setData({ restaurant, pendingOrders });
-          setError(null);
+          setState({ kind: 'ready', data: { restaurant, pendingOrders } });
         }
-      } catch {
-        if (!cancelled) {
-          setError('Failed to load your restaurant dashboard.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
+      } catch (err: unknown) {
+        if (cancelled) return;
+        if (extractHttpStatus(err) === 404) {
+          setState({ kind: 'no-restaurant' });
+        } else {
+          setState({ kind: 'error', message: 'Failed to load your restaurant dashboard.' });
         }
       }
     }
@@ -60,15 +76,14 @@ export default function RestaurantDashboard() {
   }, [reloadKey]);
 
   const retry = () => {
-    setError(null);
     setActionError(null);
-    setLoading(true);
+    setState({ kind: 'loading' });
     setReloadKey((k) => k + 1);
   };
 
   const refreshPendingOrders = async () => {
     const pendingOrders = await getPendingOrders();
-    setData((current) => (current === null ? current : { ...current, pendingOrders }));
+    setState((current) => (current.kind === 'ready' ? { ...current, data: { ...current.data, pendingOrders } } : current));
   };
 
   const handleAccept = async (orderId: string) => {
@@ -111,14 +126,14 @@ export default function RestaurantDashboard() {
     }
   };
 
-  if (loading) {
+  if (state.kind === 'loading') {
     return <LoadingState title="Loading restaurant data" message="Fetching restaurant information." />;
   }
 
-  if (error) {
+  if (state.kind === 'error') {
     return (
       <ErrorState
-        message={error}
+        message={state.message}
         action={
           <Button variant="secondary" onClick={retry}>
             Try again
@@ -128,20 +143,26 @@ export default function RestaurantDashboard() {
     );
   }
 
-  if (data === null) {
+  if (state.kind === 'no-restaurant') {
     return (
-      <ErrorState
-        message="Restaurant dashboard data was unavailable."
-        action={
-          <Button variant="secondary" onClick={retry}>
-            Try again
-          </Button>
-        }
-      />
+      <div>
+        <PageHeader title="Restaurant Dashboard" />
+        <div className="mt-6">
+          <ErrorState
+            title="Restaurant not linked"
+            message="Your restaurant hasn't been linked to your account yet. Please contact an administrator to get started."
+            action={
+              <Button variant="secondary" onClick={retry}>
+                Try again
+              </Button>
+            }
+          />
+        </div>
+      </div>
     );
   }
 
-  const { restaurant, pendingOrders } = data;
+  const { restaurant, pendingOrders } = state.data;
   const actionInProgress = actionOrderId !== null;
 
   return (

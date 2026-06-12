@@ -98,25 +98,34 @@ export default function UserProfile() {
     );
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!user) return;
     setSaving(true);
     setErrorMsg('');
-    createUserProfile({
-      keycloakId: user.id,
-      email: user.email,
-      fullName: `${user.firstName} ${user.lastName}`.trim(),
-    })
-      .then((created) => {
-        setProfile(created);
-        setPhone(created.phone ?? '');
-        setDefaultAddress(created.defaultAddress ?? '');
+    try {
+      const created = await createUserProfile({
+        keycloakId: user.id,
+        email: user.email,
+        fullName: `${user.firstName} ${user.lastName}`.trim(),
+      });
+      setProfile(created);
+      setPhone(created.phone ?? '');
+      setDefaultAddress(created.defaultAddress ?? '');
+      setView('view');
+    } catch {
+      // Profile may already exist (duplicate key) — re-fetch and switch to view mode
+      const existing = await fetchUserByKeycloakId(user.id).catch(() => null);
+      if (existing) {
+        setProfile(existing);
+        setPhone(existing.phone ?? '');
+        setDefaultAddress(existing.defaultAddress ?? '');
         setView('view');
-      })
-      .catch(() => {
-        setErrorMsg('Failed to create profile.');
-      })
-      .finally(() => setSaving(false));
+      } else {
+        setErrorMsg('Failed to save profile.');
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = (event: FormEvent) => {
@@ -138,12 +147,12 @@ export default function UserProfile() {
   if (view === 'no-profile') {
     return (
       <div className="mx-auto max-w-2xl">
-        <PageHeader title="Create Your Profile">{graphqlBadge}</PageHeader>
+        <PageHeader title="Set Up Your Profile">{graphqlBadge}</PageHeader>
 
         <Card className="mt-6">
           <CardHeader>
             <p className="text-sm text-slate-500">
-              No profile exists yet. Create one from your account details.
+              No profile found. Save one from your account details.
             </p>
           </CardHeader>
 
@@ -161,7 +170,7 @@ export default function UserProfile() {
 
           <div className="mt-6">
             <Button onClick={handleCreate} disabled={saving}>
-              {saving ? 'Creating...' : 'Create profile'}
+              {saving ? 'Saving...' : 'Save profile'}
             </Button>
           </div>
         </Card>

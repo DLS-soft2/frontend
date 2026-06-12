@@ -71,6 +71,12 @@ export default function RestaurantList() {
             key={restaurant.restaurantId}
             className="flex flex-col hover:border-slate-300 hover:shadow-md transition-all"
           >
+            <svg className="mb-3 h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2" />
+              <path d="M7 2v20" />
+              <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
+            </svg>
+
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-lg font-bold text-slate-900">{restaurant.name}</h2>
               <span
@@ -88,12 +94,12 @@ export default function RestaurantList() {
             </div>
 
             {restaurant.description && (
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <p className="mt-2 line-clamp-2 text-sm text-slate-500">
                 {restaurant.description}
               </p>
             )}
 
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-slate-400">
               {restaurant.address}
               {restaurant.openingHours && (
                 <> &middot; {restaurant.openingHours}</>
