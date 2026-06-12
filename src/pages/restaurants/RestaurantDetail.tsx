@@ -97,53 +97,86 @@ export default function RestaurantDetail() {
     <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-bold">{restaurant.name}</h1>
       <p className="mt-2">{restaurant.description}</p>
-      <p className="mt-1 text-sm text-gray-600">
+      <p className="mt-1 text-sm text-slate-500">
         {restaurant.address} &middot; {restaurant.openingHours} &middot;{' '}
-        {restaurant.isOpen ? 'Open' : 'Closed'}
+        {restaurant.isOpen ? (
+          <span className="font-medium text-green-700">Open</span>
+        ) : (
+          <span className="font-medium text-red-700">Closed</span>
+        )}
       </p>
+
       <div className="mt-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold">Menu</h2>
         <ApiSourceToggle source={menuSource} onChange={setMenuSource} />
       </div>
-      {menuItems.length === 0 && <p className="mt-2 text-gray-600">No menu items available.</p>}
+      {menuItems.length === 0 && (
+        <p className="mt-4 text-sm text-slate-500">No menu items available.</p>
+      )}
       <div className="mt-4 grid gap-3">
-        {menuItems.map((item) => (
-          <Card as="article" key={item.menuItemId} className="p-4">
+        {menuItems.map((item) => {
+          const qty = quantities[item.menuItemId] ?? 0;
+          return (
+            <Card
+              as="article"
+              key={item.menuItemId}
+              className={`p-4 transition ${qty > 0 ? 'border-blue-300 bg-blue-50/40' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <strong>{item.name}</strong>
+                  <p className="mt-1 text-sm text-slate-500">{item.description}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">{formatPrice(item.price)}</span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    aria-label={`Remove one ${item.name}`}
+                    onClick={() => changeQuantity(item.menuItemId, -1)}
+                  >
+                    -
+                  </Button>
+                  <span className="w-6 text-center text-sm font-medium">{qty}</span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    aria-label={`Add one ${item.name}`}
+                    onClick={() => changeQuantity(item.menuItemId, 1)}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {selectedItems.length > 0 && (
+        <div className="sticky bottom-4 z-10 mt-6">
+          <Card className="border-blue-200 bg-blue-50 shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <strong>{item.name}</strong>
-                <p className="mt-1 text-sm text-gray-600">{item.description}</p>
+                <p className="text-sm font-semibold text-blue-900">
+                  Your order &middot; {selectedItems.length}{' '}
+                  {selectedItems.length === 1 ? 'item' : 'items'}
+                </p>
+                <p className="mt-0.5 text-lg font-bold text-blue-950">
+                  Total: {formatPrice(total)}
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">{formatPrice(item.price)}</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  aria-label={`Remove one ${item.name}`}
-                  onClick={() => changeQuantity(item.menuItemId, -1)}
-                >
-                  -
-                </Button>
-                <span className="w-6 text-center text-sm">{quantities[item.menuItemId] ?? 0}</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  aria-label={`Add one ${item.name}`}
-                  onClick={() => changeQuantity(item.menuItemId, 1)}
-                >
-                  +
-                </Button>
-              </div>
+              <Button onClick={proceedToOrder}>Create order</Button>
             </div>
           </Card>
-        ))}
-      </div>
-      <div className="mt-6 flex items-center justify-between">
-        <strong>Total: {formatPrice(total)}</strong>
-        <Button onClick={proceedToOrder} disabled={selectedItems.length === 0}>
-          Create order
-        </Button>
-      </div>
+        </div>
+      )}
+
+      {selectedItems.length === 0 && (
+        <p className="mt-6 text-center text-sm text-slate-400">
+          Add items from the menu to start an order.
+        </p>
+      )}
     </div>
   );
 }

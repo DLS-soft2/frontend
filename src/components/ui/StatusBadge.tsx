@@ -13,10 +13,15 @@ interface StatusBadgeProps {
   status: OrderStatus;
 }
 
+function toTitleCase(raw: string): string {
+  const lower = raw.replace(/_/g, ' ').toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 export default function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASSES[status]}`}>
-      {status.replace(/_/g, ' ')}
+      {toTitleCase(status)}
     </span>
   );
 }

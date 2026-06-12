@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { deleteOrder, getOrder, getOrderSnapshots } from '../../api/orders';
-import type { Order, OrderSnapshot } from '../../types/order';
+import { Button, ButtonLink } from '../../components/ui/Button';
+import { Card, CardHeader } from '../../components/ui/Card';
+import { ErrorState } from '../../components/ui/ErrorState';
+import { LoadingState } from '../../components/ui/LoadingState';
+import { SagaTimeline } from '../../components/ui/SagaTimeline';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { useNotificationContext } from '../../context/useNotificationContext';
-import { formatDateTime, formatPrice, formatRelativeTime } from '../../utils/format';
+import type { Order, OrderSnapshot } from '../../types/order';
+import { formatDateTime, formatPrice } from '../../utils/format';
 
 export default function OrderDetail() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -35,8 +40,28 @@ export default function OrderDetail() {
     if (orderNotifications.length > 0) loadOrder();
   }, [orderNotifications.length, loadOrder]);
 
-  if (error) return <p className="mx-auto max-w-2xl px-4 py-8 text-red-700">{error}</p>;
-  if (!order) return <p className="mx-auto max-w-2xl px-4 py-8 text-gray-600">Loading order...</p>;
+  if (error) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <ErrorState
+          message={error}
+          action={
+            <Button variant="secondary" onClick={loadOrder}>
+              Try again
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <LoadingState title="Loading order" message="Fetching order details and saga history." />
+      </div>
+    );
+  }
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -51,64 +76,61 @@ export default function OrderDetail() {
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Order {order.id.slice(0, 8)}</h1>
-        <StatusBadge status={order.status} />
+    <div className="mx-auto grid max-w-2xl gap-4">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Order {order.id.slice(0, 8)}</h1>
+            <StatusBadge status={order.status} />
+          </div>
+          <p className="text-sm text-slate-500">
+            Placed {formatDateTime(order.created_at)} &middot; Delivery to{' '}
+            {order.delivery_address}
+          </p>
+        </CardHeader>
+
+        <h2 className="text-lg font-semibold">Items</h2>
+        <ul className="mt-2 divide-y divide-slate-100">
+          {order.items.map((item) => (
+            <li key={item.id} className="flex justify-between py-2 text-sm">
+              <span>
+                {item.quantity} &times; {item.name}
+              </span>
+              <span className="font-medium">{formatPrice(item.quantity * item.unit_price)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-right text-lg font-bold">
+          Total: {formatPrice(order.total_amount)}
+        </p>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-lg font-semibold">Saga Timeline</h2>
+          <p className="text-sm text-slate-500">
+            Order lifecycle — snapshots and live events
+          </p>
+        </CardHeader>
+        <SagaTimeline
+          snapshots={snapshots}
+          notifications={orderNotifications}
+          currentStatus={order.status}
+        />
+      </Card>
+
+      <div className="flex items-center gap-3">
+        <ButtonLink to={`/orders/${order.id}/payments`} variant="secondary" size="sm">
+          View payments
+        </ButtonLink>
+        <ButtonLink to="/orders" variant="ghost" size="sm">
+          Back to orders
+        </ButtonLink>
+        <div className="flex-1" />
+        <Button variant="ghost" size="sm" onClick={handleDelete} disabled={deleting}>
+          {deleting ? 'Deleting...' : 'Delete order'}
+        </Button>
       </div>
-      <p className="mt-2 text-sm text-gray-600">
-        Placed {formatDateTime(order.created_at)} &middot; Delivery to {order.delivery_address}
-      </p>
-      <p className="mt-1 text-sm">
-        <Link to={`/orders/${order.id}/payments`} className="text-blue-600 hover:underline">
-          View Payments
-        </Link>
-      </p>
-      <h2 className="mt-6 text-xl font-semibold">Items</h2>
-      <ul className="mt-2 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white px-4 shadow-sm">
-        {order.items.map((item) => (
-          <li key={item.id} className="flex justify-between py-2 text-sm">
-            <span>
-              {item.quantity} &times; {item.name}
-            </span>
-            <span>{formatPrice(item.quantity * item.unit_price)}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-2 text-right">
-        <strong>Total: {formatPrice(order.total_amount)}</strong>
-      </p>
-      <h2 className="mt-6 text-xl font-semibold">Live Updates</h2>
-      {orderNotifications.length === 0 && (
-        <p className="mt-2 text-gray-600">No live updates yet.</p>
-      )}
-      <ul className="mt-2 space-y-1">
-        {orderNotifications.map((notification) => (
-          <li key={notification.id} className="rounded border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm">
-            {notification.message}
-            <span className="ml-2 text-xs text-gray-400">
-              {formatRelativeTime(notification.timestamp)}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <h2 className="mt-6 text-xl font-semibold">History</h2>
-      {snapshots.length === 0 && <p className="mt-2 text-gray-600">No history yet.</p>}
-      <ol className="mt-2 border-l-2 border-gray-200">
-        {snapshots.map((snapshot) => (
-          <li key={snapshot.id} className="py-2 pl-4">
-            <StatusBadge status={snapshot.status} />
-            <span className="ml-2 text-sm text-gray-600">{formatDateTime(snapshot.created_at)}</span>
-          </li>
-        ))}
-      </ol>
-      <button
-        onClick={handleDelete}
-        disabled={deleting}
-        className="mt-6 rounded border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {deleting ? 'Deleting...' : 'Delete order'}
-      </button>
-    </main>
+    </div>
   );
 }
