@@ -10,6 +10,18 @@ export interface Restaurant {
   isAvailable: boolean;
 }
 
+export type PendingOrderStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface PendingOrder {
+  orderId: string;
+  customerId: string;
+  restaurantId: string;
+  paymentId: string;
+  amount: number;
+  status: PendingOrderStatus;
+  createdAt: string | null;
+}
+
 export interface MenuItem {
   menuItemId: string;
   name: string;
