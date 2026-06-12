@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getOrder, getOrderSnapshots } from '../../api/orders';
+import { getDeliveryReceipt, type DeliveryReceipt as DeliveryReceiptType } from '../../api/receipts';
 import { Button, ButtonLink } from '../../components/ui/Button';
 import { Card, CardHeader } from '../../components/ui/Card';
+import { DeliveryReceipt } from '../../components/ui/DeliveryReceipt';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { LoadingState } from '../../components/ui/LoadingState';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -17,6 +19,7 @@ export default function OrderDetail() {
   const { notifications } = useNotificationContext();
   const [order, setOrder] = useState<Order | null>(null);
   const [snapshots, setSnapshots] = useState<OrderSnapshot[]>([]);
+  const [receipt, setReceipt] = useState<DeliveryReceiptType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const orderNotifications = notifications.filter((n) => n.order_id === orderId);
 
@@ -37,6 +40,12 @@ export default function OrderDetail() {
   useEffect(() => {
     if (orderNotifications.length > 0) loadOrder();
   }, [orderNotifications.length, loadOrder]);
+
+  useEffect(() => {
+    if (order?.status === 'DELIVERED' && orderId) {
+      getDeliveryReceipt(orderId).then(setReceipt);
+    }
+  }, [order?.status, orderId]);
 
   if (error) {
     return (
@@ -106,6 +115,12 @@ export default function OrderDetail() {
           />
         </Card>
       </div>
+
+      {receipt && (
+        <div className="mt-6">
+          <DeliveryReceipt receipt={receipt} />
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <ButtonLink to={`/orders/${order.id}/payments`} variant="secondary" size="sm">
