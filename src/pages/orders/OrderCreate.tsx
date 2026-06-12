@@ -1,28 +1,36 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createOrder } from '../../api/orders';
+import { Button, ButtonLink } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { useCart } from '../../context/useCart';
 import type { OrderDraft } from '../../types/order';
 import { formatPrice } from '../../utils/format';
 
 export default function OrderCreate() {
   const navigate = useNavigate();
   const location = useLocation();
-  const draft = location.state as OrderDraft | null;
+  const { draft: cartDraft, clearCart } = useCart();
+  const locationDraft = location.state as OrderDraft | null;
+  const draft = cartDraft ?? locationDraft;
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [addressError, setAddressError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!draft || draft.items.length === 0) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <p className="text-gray-600">
-          No items selected.{' '}
-          <Link to="/restaurants" className="text-blue-600 hover:underline">
-            Browse restaurants
-          </Link>{' '}
-          to start an order.
-        </p>
-      </main>
+      <div className="mx-auto max-w-2xl">
+        <Card className="text-center">
+          <h1 className="text-lg font-semibold">Your cart is empty</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Pick a restaurant and add some dishes to start an order.
+          </p>
+          <div className="mt-5">
+            <ButtonLink to="/restaurants">Browse restaurants</ButtonLink>
+          </div>
+        </Card>
+      </div>
     );
   }
 
@@ -30,6 +38,11 @@ export default function OrderCreate() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (deliveryAddress.trim() === '') {
+      setAddressError('Delivery address is required.');
+      return;
+    }
+    setAddressError(null);
     setSubmitting(true);
     setError(null);
     try {
@@ -38,6 +51,7 @@ export default function OrderCreate() {
         delivery_address: deliveryAddress,
         items: draft.items,
       });
+      clearCart();
       navigate(`/orders/${order.id}`);
     } catch {
       setError('Failed to create order.');
@@ -46,25 +60,27 @@ export default function OrderCreate() {
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-bold">Create Order</h1>
       <p className="mt-2">
         Ordering from <strong>{draft.restaurantName}</strong>
       </p>
-      <ul className="mt-4 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white px-4 shadow-sm">
-        {draft.items.map((item) => (
-          <li key={item.menu_item_id} className="flex justify-between py-2 text-sm">
-            <span>
-              {item.quantity} &times; {item.name}
-            </span>
-            <span>{formatPrice(item.quantity * item.unit_price)}</span>
-          </li>
-        ))}
-      </ul>
+      <Card className="mt-4 px-6 py-2">
+        <ul className="divide-y divide-gray-200">
+          {draft.items.map((item) => (
+            <li key={item.menu_item_id} className="flex justify-between py-2 text-sm">
+              <span>
+                {item.quantity} &times; {item.name}
+              </span>
+              <span>{formatPrice(item.quantity * item.unit_price)}</span>
+            </li>
+          ))}
+        </ul>
+      </Card>
       <p className="mt-2 text-right">
         <strong>Total: {formatPrice(total)}</strong>
       </p>
-      <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
+      <form onSubmit={handleSubmit} noValidate className="mt-4 grid gap-3">
         <label htmlFor="delivery-address" className="text-sm font-medium">
           Delivery address
         </label>
@@ -73,18 +89,21 @@ export default function OrderCreate() {
           value={deliveryAddress}
           onChange={(event) => setDeliveryAddress(event.target.value)}
           required
+          aria-invalid={addressError !== null}
+          aria-describedby={addressError ? 'delivery-address-error' : undefined}
           placeholder="Street, number, city"
-          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {addressError && (
+          <p id="delivery-address-error" className="text-sm text-red-700">
+            {addressError}
+          </p>
+        )}
         {error && <p className="text-sm text-red-700">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" disabled={submitting} className="justify-self-start">
           {submitting ? 'Placing order...' : 'Place order'}
-        </button>
+        </Button>
       </form>
-    </main>
+    </div>
   );
 }

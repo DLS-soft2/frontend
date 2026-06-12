@@ -3,25 +3,31 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getRestaurant, listMenuItems } from '../../api/restaurants';
 import { fetchMenuItemsGraphql } from '../../api/restaurantQueries';
 import ApiSourceToggle, { type ApiSource } from '../../components/ui/ApiSourceToggle';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { ErrorState } from '../../components/ui/ErrorState';
+import { LoadingState } from '../../components/ui/LoadingState';
+import { useCart } from '../../context/useCart';
 import type { MenuItemSummary, Restaurant } from '../../types/restaurant';
-import type { OrderDraft } from '../../types/order';
 import { formatPrice } from '../../utils/format';
 
 export default function RestaurantDetail() {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
+  const { setDraft } = useCart();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItemSummary[]>([]);
   const [menuSource, setMenuSource] = useState<ApiSource>('rest');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!restaurantId) return;
     getRestaurant(restaurantId)
       .then(setRestaurant)
       .catch(() => setError('Failed to load restaurant.'));
-  }, [restaurantId]);
+  }, [restaurantId, reloadKey]);
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -29,10 +35,36 @@ export default function RestaurantDetail() {
     fetchMenu(restaurantId)
       .then(setMenuItems)
       .catch(() => setError('Failed to load menu.'));
-  }, [restaurantId, menuSource]);
+  }, [restaurantId, menuSource, reloadKey]);
 
-  if (error) return <p className="mx-auto max-w-2xl px-4 py-8 text-red-700">{error}</p>;
-  if (!restaurant) return <p className="mx-auto max-w-2xl px-4 py-8 text-gray-600">Loading restaurant...</p>;
+  const retry = () => {
+    setError(null);
+    setRestaurant(null);
+    setReloadKey((key) => key + 1);
+  };
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <ErrorState
+          message={error}
+          action={
+            <Button variant="secondary" onClick={retry}>
+              Try again
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (!restaurant) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <LoadingState title="Loading restaurant" message="Fetching the menu and opening hours." />
+      </div>
+    );
+  }
 
   const changeQuantity = (menuItemId: string, delta: number) => {
     setQuantities((prev) => ({
@@ -53,16 +85,16 @@ export default function RestaurantDetail() {
   const total = selectedItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
 
   const proceedToOrder = () => {
-    const draft: OrderDraft = {
+    setDraft({
       restaurantId: restaurant.restaurantId,
       restaurantName: restaurant.name,
       items: selectedItems,
-    };
-    navigate('/orders/new', { state: draft });
+    });
+    navigate('/orders/new');
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-bold">{restaurant.name}</h1>
       <p className="mt-2">{restaurant.description}</p>
       <p className="mt-1 text-sm text-gray-600">
@@ -74,12 +106,9 @@ export default function RestaurantDetail() {
         <ApiSourceToggle source={menuSource} onChange={setMenuSource} />
       </div>
       {menuItems.length === 0 && <p className="mt-2 text-gray-600">No menu items available.</p>}
-      <ul className="mt-4 grid gap-3">
+      <div className="mt-4 grid gap-3">
         {menuItems.map((item) => (
-          <li
-            key={item.menuItemId}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-          >
+          <Card as="article" key={item.menuItemId} className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <strong>{item.name}</strong>
@@ -87,34 +116,34 @@ export default function RestaurantDetail() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">{formatPrice(item.price)}</span>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  aria-label={`Remove one ${item.name}`}
                   onClick={() => changeQuantity(item.menuItemId, -1)}
-                  className="rounded border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-100"
                 >
                   -
-                </button>
+                </Button>
                 <span className="w-6 text-center text-sm">{quantities[item.menuItemId] ?? 0}</span>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  aria-label={`Add one ${item.name}`}
                   onClick={() => changeQuantity(item.menuItemId, 1)}
-                  className="rounded border border-gray-300 px-2.5 py-1 text-sm hover:bg-gray-100"
                 >
                   +
-                </button>
+                </Button>
               </div>
             </div>
-          </li>
+          </Card>
         ))}
-      </ul>
+      </div>
       <div className="mt-6 flex items-center justify-between">
         <strong>Total: {formatPrice(total)}</strong>
-        <button
-          onClick={proceedToOrder}
-          disabled={selectedItems.length === 0}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button onClick={proceedToOrder} disabled={selectedItems.length === 0}>
           Create order
-        </button>
+        </Button>
       </div>
-    </main>
+    </div>
   );
 }
